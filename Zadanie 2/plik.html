@@ -6,23 +6,22 @@
 <title>MyTODO App</title>
  </head>
  <body>
-    <h1>MyNotes</h1>
-    <div id="todoListView" style="background-color: violet; height: 200px;"></div>
+    <h1 id="title">MyNotes</h1>
+    <div id="todoListView"></div>
  
     <form>
-        <label>Title</label>
-        <input type="text" id="inputTitle"/>
-        <label>Description</label>
-        <input type="text" id="inputDescription"/>
-        <label>Place</label>
-        <input type="text" id="inputPlace"/>
-        <label>Due date</label>
-        <input type="date" id="inputDate"/>
-        <input type="button" value="add"
-        onclick="addTodo()"/>
+        <label class="labels"  id="topDistance">Title</label>
+        <input type="text" id="inputTitle topDistance"/>
+        <label id="topDistance">Description</label>
+        <input type="text" id="inputDescription topDistance"/>
+        <label id="topDistance">Place</label>
+        <input type="text" id="inputPlace topDistance"/>
+        <label id="topDistance">Due date</label>
+        <input type="date" id="inputDate topDistance"/>
+        <input type="button" value="add" onclick="addTodo()" id="topDistance"/>
     </form>
-    <div>
-        <label>Search</label>
+    <div id="topDistance">
+        <label class="labels">Search</label>
         <input type="text" id="inputSearch" placeholder="Type Your seach here..."/>
     </div>
 </body>
