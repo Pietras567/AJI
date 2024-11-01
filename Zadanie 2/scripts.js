@@ -1,6 +1,8 @@
 "use strict"
 let todoList = []; //declares a new array for Your todo list
 
+let isTableView = true;
+
 let initList = function() {
     /*
     let savedList = window.localStorage.getItem("todos");
@@ -86,17 +88,27 @@ let deleteTodo = function(index) {
     updateJSONbin();
 }
 
-let updateTodoList = function() {
-    let todoListDiv =
-    document.getElementById("todoListView");
 
-    //remove all elements
+let updateTodoList = function () {
+    let todoListDiv = document.getElementById("todoListView");
+
     while (todoListDiv.firstChild) {
         todoListDiv.removeChild(todoListDiv.firstChild);
     }
+    if (isTableView) {
+        renderTable(todoListDiv);
+    } else {
+        renderList(todoListDiv);
+    }
+
+
+
+}
+
+let renderList = function(todoListDiv) {
 
     //add all elements
-    let filterInput = document.getElementById("inputSearch");   
+    let filterInput = document.getElementById("inputSearch");
 
     //add all elements
     for (let todo in todoList) {
@@ -107,7 +119,7 @@ let updateTodoList = function() {
         ) {
             let newElement = document.createElement("p");
             let newContent = document.createTextNode(todoList[todo].title + " " +
-                                                     todoList[todo].description);
+                todoList[todo].description + " " + todoList[todo].place + " " + (todoList[todo].dueDate ? new Date(todoList[todo].dueDate).toLocaleDateString() : ""));
             newElement.appendChild(newContent);
             todoListDiv.appendChild(newElement);
 
@@ -122,7 +134,96 @@ let updateTodoList = function() {
             newElement.appendChild(newDeleteButton);
         }
     }
+
 }
+
+let renderTable = function (todoListDiv) {
+
+    let table = document.createElement("table");
+    table.classList.add("table","table-striped","table-hover","table-bordered");
+
+    let headerRow = document.createElement("tr");
+    headerRow.classList.add("table-header");
+    ["Title", "Description", "Place", "Due Date", "Delete"].forEach(headerText => {
+        let headerCell = document.createElement("th");
+        headerCell.textContent = headerText;
+        headerRow.appendChild(headerCell);
+    });
+    table.appendChild(headerRow);
+
+    todoList.forEach((todo, index) => {
+        let row = document.createElement("tr");
+
+        let titleCell = document.createElement("td");
+        titleCell.textContent = todo.title;
+        row.appendChild(titleCell);
+
+        let descriptionCell = document.createElement("td");
+        descriptionCell.textContent = todo.description;
+        row.appendChild(descriptionCell);
+
+        let placeCell = document.createElement("td");
+        placeCell.textContent = todo.place;
+        row.appendChild(placeCell);
+
+        let dateCell = document.createElement("td");
+        dateCell.textContent = todo.dueDate ? new Date(todo.dueDate).toLocaleDateString() : "";
+        row.appendChild(dateCell);
+
+        let deleteCell = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.value = "x";
+        deleteButton.classList.add("btn", "btn-dark", "btn-sm");
+        deleteButton.addEventListener("click", function() {
+            deleteTodo(index);
+        });
+        deleteCell.appendChild(deleteButton);
+        row.appendChild(deleteCell);
+
+        table.appendChild(row);
+    });
+
+    todoListDiv.appendChild(table);
+
+};
+// let updateTodoList = function() {
+//     let todoListDiv =
+//     document.getElementById("todoListView");
+//
+//     //remove all elements
+//     while (todoListDiv.firstChild) {
+//         todoListDiv.removeChild(todoListDiv.firstChild);
+//     }
+//
+//     //add all elements
+//     let filterInput = document.getElementById("inputSearch");
+//
+//     //add all elements
+//     for (let todo in todoList) {
+//         if (
+//             (filterInput.value == "") ||
+//             (todoList[todo].title.includes(filterInput.value)) ||
+//             (todoList[todo].description.includes(filterInput.value))
+//         ) {
+//             let newElement = document.createElement("p");
+//             let newContent = document.createTextNode(todoList[todo].title + " " +
+//                                                      todoList[todo].description);
+//             newElement.appendChild(newContent);
+//             todoListDiv.appendChild(newElement);
+//
+//             let newDeleteButton = document.createElement("input");
+//             newDeleteButton.type = "button";
+//             newDeleteButton.value = "x";
+//             newDeleteButton.addEventListener("click",
+//                 function() {
+//                     deleteTodo(todo);
+//                 });
+//
+//             newElement.appendChild(newDeleteButton);
+//         }
+//     }
+// }
 
 let addTodo = function() {
     //get the elements in the form
@@ -150,6 +251,11 @@ let addTodo = function() {
 
     updateJSONbin();
   }
+
+let toggleView = function() {
+    isTableView = !isTableView;
+    updateJSONbin();
+}
 
 
 initList();

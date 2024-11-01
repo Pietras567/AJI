@@ -1,24 +1,25 @@
-body {
-    background-color: aliceblue;
-}
+/*body {*/
+/*    background-color: aliceblue;*/
+/*}*/
 
-#todoListView {
-    background-color: violet;
-    min-height: 200px;
-    width: 90%;
-    margin-left: 5%;
-    height: auto;
-    border: 7px solid rgb(111, 13, 131);
-}
+/*#todoListView {*/
+/*    background-color: violet;*/
+/*    min-height: 200px;*/
+/*    width: 90%;*/
+/*    margin-left: 5%;*/
+/*    height: auto;*/
+/*    border: 7px solid rgb(111, 13, 131);*/
+/*}*/
 
-#title {
-    text-align: center;
-}
 
-.labels {
-    margin-left: 25%;
-}
+/*#title {*/
+/*    text-align: center;*/
+/*}*/
 
-#topDistance {
-    margin-top: 20px;
-}
+/*.labels {*/
+/*    margin-left: 25%;*/
+/*}*/
+
+/*#topDistance {*/
+/*    margin-top: 20px;*/
+/*}*/
