@@ -44,8 +44,8 @@
         </div>
 
         <div class="col-6 mb-3">
-            <label for="inputDate" class="form-label">Due Date</label>
-            <input type="date" id="inputDate" class="form-control "  />
+            <label for="inputDueDate" class="form-label">Due Date</label>
+            <input type="date" id="inputDueDate" class="form-control "  />
         </div>
 
         <div class="text-center">
@@ -58,7 +58,27 @@
 
 <div class="text-center">
     <label for="inputSearch" class="form-label">Search</label>
-    <input class="btn btn-light" type="text" id="inputSearch" placeholder="Type Your seach here..."/>
+    <input class="btn btn-light" type="text" id="inputSearch" placeholder="Type Your search here..."/>
 </div>
+
+<div class="row g-3 my-4">
+    <div class="col-6 mb-3">
+        <label for="inputStartDate" class="form-label">Start Date</label>
+        <input type="date" id="inputStartDate" class="form-control" />
+    </div>
+
+    <div class="col-6 mb-3">
+        <label for="inputEndDate" class="form-label">End Date</label>
+        <input type="date" id="inputEndDate" class="form-control" />
+    </div>
+
+    <div class="text-center">
+        <label for="enableDateFilter">Enable Date Filtering</label>
+        <input type="checkbox" id="enableDateFilter" onclick="enableDateFilter()" />
+        </div>
+</div>
+
+
+
 </body>
 </html>
