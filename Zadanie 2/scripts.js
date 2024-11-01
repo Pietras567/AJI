@@ -1,3 +1,4 @@
+
 "use strict"
 let todoList = []; //declares a new array for Your todo list
 
@@ -111,11 +112,7 @@ let updateTodoList = function () {
     while (todoListDiv.firstChild) {
         todoListDiv.removeChild(todoListDiv.firstChild);
     }
-
-
     renderTable(todoListDiv);
-
-
 }
 
 let enableDateFilter = function () {
@@ -134,7 +131,7 @@ let renderTable = function (todoListDiv) {
 
     let headerRow = document.createElement("tr");
     headerRow.classList.add("table-header");
-    ["Title", "Description", "Place", "Due Date", "Delete"].forEach(headerText => {
+    ["Title", "Description", "Place", "Category", "Due Date", "Delete"].forEach(headerText => {
         let headerCell = document.createElement("th");
         headerCell.textContent = headerText;
         headerRow.appendChild(headerCell);
@@ -154,8 +151,8 @@ let renderTable = function (todoListDiv) {
             let textFilter = ((filterInput.value === "") ||
                 (todo.title.includes(filterInput.value)) ||
                 (todo.description.includes(filterInput.value)) ||
-                (todo.place.includes(filterInput.value)))
-
+                (todo.place.includes(filterInput.value)) ||
+                (todo.category.includes(filterInput.value)))
             if (
                 textFilter
             ) {
@@ -173,6 +170,11 @@ let renderTable = function (todoListDiv) {
                 let placeCell = document.createElement("td");
                 placeCell.textContent = todo.place;
                 row.appendChild(placeCell);
+
+                let categoryCell = document.createElement("td");
+                categoryCell.textContent = todo.category;
+                row.appendChild(categoryCell);
+
 
                 let dateCell = document.createElement("td");
                 dateCell.textContent = todo.dueDate ? new Date(todo.dueDate).toLocaleDateString() : "";
@@ -199,23 +201,78 @@ let renderTable = function (todoListDiv) {
 };
 
 
-let addTodo = function () {
+
+async function groqChatCompletion(textDescription) {
+    const apiKey = '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';
+    const url = 'https://api.groq.com/openai/v1/chat/completions';
+
+    const requestBody = {
+        model: 'llama3-8b-8192',
+        messages: [
+            {
+                role: 'system',
+                content: 'Categorize the following text description into one of the categories: \'praca\', \'życie prywatne\', \'studia\'. Respond using ONLY one of these categories, no more words'
+            },
+            {
+                role: 'user',
+                content: textDescription
+            }
+        ]
+    };
+
+    console.log(JSON.stringify(prompt));
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(requestBody)
+        });
+        const result = await response.json();
+
+        console.log(result);
+        return result.choices[0].message.content.trim();
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+let addTodo = async function () {
     //get the elements in the form
     let inputTitle = document.getElementById("inputTitle");
     let inputDescription = document.getElementById("inputDescription");
     let inputPlace = document.getElementById("inputPlace");
     let inputDueDate = document.getElementById("inputDueDate");
     //get the values from the form
+
+    let textDescription = `${inputTitle.value} : ${inputDescription.value}`;
+
+    let category = '';
+    try {
+        category = await groqChatCompletion(textDescription);
+    } catch (error) {
+        console.error("Error categorizing task:", error);
+        category = "Uncategorized";
+    }
+
+
     let newTitle = inputTitle.value;
     let newDescription = inputDescription.value;
     let newPlace = inputPlace.value;
     let newDate = new Date(inputDueDate.value);
+
+
     //create new item
     let newTodo = {
         title: newTitle,
         description: newDescription,
         place: newPlace,
-        category: '',
+        category: category,
         dueDate: newDate
     };
     //add item to the list
