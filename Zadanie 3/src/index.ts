@@ -10,25 +10,16 @@ import "reflect-metadata";
 
 
 const AppDataSource = new DataSource({
-    type: "mysql",
+    type: "postgres",
     host: "localhost",
-    port: 3306,
-    username: "root",
-    password: "password",
-    database: "shop_db",
-    entities: [__dirname + "/**/*.entity{.ts,.js}"],
+    port: 5432,
+    username: "AJI",
+    password: "AJIPWD",
+    database: "AJI_3DB",
     synchronize: true,
-    logging: true
+    logging: true,
+    entities: ["./entities/*.ts"],
 });
-
-const AppDataSource5 = new DataSource({
-    type: "sqlite",
-    database: "database.sqlite",
-    entities: [ProductItem, Category, Order, Product, OrderStatus],
-    synchronize: true,
-    logging: true
-});
-
 
 const app = express();
 app.use(bodyParser.json());
@@ -54,6 +45,9 @@ async function startServer() {
 }
 
 async function addProductAndOrder() {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    await sleep(5000);
+
     const categoryRepository = AppDataSource.getRepository(Category);
     const productRepository = AppDataSource.getRepository(Product);
     const orderRepository = AppDataSource.getRepository(Order);
@@ -73,7 +67,8 @@ async function addProductAndOrder() {
 
     // Get a product
     const product2 = await productRepository.findOne({
-        where: { id: 1 },
+        // @ts-ignore
+        where: { _id: 1 },
     });
 
     // Create product item

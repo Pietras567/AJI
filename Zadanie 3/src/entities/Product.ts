@@ -4,18 +4,19 @@ import { Category } from './Category'
 
 @Entity("Products")
 export class Product {
-    @PrimaryGeneratedColumn() private _id: number | undefined;
+    @PrimaryGeneratedColumn()
+    private _id!: number;
 
-    @Column("string")
+    @Column("varchar")
     private _name: string;
 
-    @Column("string")
+    @Column("varchar")
     private _description: string;
 
     @Column("decimal", { precision: 10, scale: 2 })
     private _price: number;
 
-    @Column("number")
+    @Column("float")
     private _weight: number;
 
     @ManyToOne(() => Category, { eager: true })
@@ -69,7 +70,7 @@ export class Product {
         this._category = value;
     }
 
-    get id(): number | undefined {
+    get id(): number {
         return this._id;
     }
 }

@@ -6,7 +6,7 @@ import {Order} from "./Order";
 @Entity("OrderStatuses")
 export class OrderStatus {
     @PrimaryGeneratedColumn()
-    private _id: number | undefined;
+    private _id!: number;
 
     @Column({
         type: "enum",
@@ -15,7 +15,7 @@ export class OrderStatus {
     private _currentStatus: string;
 
     @OneToMany(() => Order, (item: Order) => item.status, { cascade: true })
-    private _productList: ProductItem[] = [];
+    private _productList!: ProductItem[];
 
     constructor(currentStatus: string) {
         this._currentStatus = currentStatus;
@@ -29,7 +29,7 @@ export class OrderStatus {
         this._currentStatus = value;
     }
 
-    get id(): number | undefined {
+    get id(): number {
         return this._id;
     }
 }

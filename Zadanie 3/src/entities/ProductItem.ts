@@ -6,16 +6,16 @@ import { Order } from "./Order";
 @Entity("ProductsItems")
 export class ProductItem {
     @PrimaryGeneratedColumn()
-    _id: number | undefined;
+    _id!: number;
 
-    @Column("number")
+    @Column("int")
     private _quantity: number;
 
     @ManyToOne(() => Product, { eager: true })
     private _product: Product;
 
     @ManyToOne(() => Order, (order: Order) => order.productList)
-    private _order: Order | undefined;
+    private _order!: Order;
 
 
     constructor(product: Product, quantity: number) {
@@ -39,7 +39,7 @@ export class ProductItem {
         this._quantity = value;
     }
 
-    get order(): Order | undefined {
+    get order(): Order {
         return this._order;
     }
 

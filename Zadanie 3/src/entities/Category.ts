@@ -5,17 +5,16 @@ import {Product} from "./Product";
 @Entity("Categories")
 export class Category {
     @PrimaryGeneratedColumn()
-    private _id: number | undefined;
+    private _id!: number;
 
-    @Column("string")
+    @Column("varchar")
     private _name: string;
 
     @OneToMany(() => Product, (product) => product.category)
-    private _products: Product[];
+    private _products!: Product[];
 
     constructor(name: string) {
         this._name = name;
-        this._products = [];
     }
 
     get name(): string {
@@ -27,12 +26,12 @@ export class Category {
     }
 
 
-    get id(): number | undefined {
+    get id(): number {
         return this._id;
     }
 
 
-    set id(value: number | undefined) {
+    set id(value: number) {
         this._id = value;
     }
 

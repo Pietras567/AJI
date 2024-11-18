@@ -7,25 +7,25 @@ import {ProductItem} from "./ProductItem";
 @Entity("Orders")
 export class Order {
   @PrimaryGeneratedColumn()
-  private _id: number | undefined;
+  private _id!: number;
 
-  @Column("date")
-  private _orderDate: Date | undefined;
+  @Column("timestamp")
+  private _orderDate?: Date;
 
-  @Column("string")
+  @Column("varchar")
   private _userName: string;
 
-  @Column("string")
+  @Column("varchar")
   private _email: string;
 
-  @Column("string")
+  @Column("varchar")
   private _phone: string;
 
   @ManyToOne(() => OrderStatus, { eager: true })
   private _status: OrderStatus;
 
   @OneToMany(() => ProductItem, (item: ProductItem) => item.order, { cascade: true })
-  private _productList: ProductItem[] = [];
+  private _productList!: ProductItem[];
 
   constructor(status: OrderStatus, userName: string, email: string, phone: string, orderDate?: Date) {
     this._status = status;
@@ -43,10 +43,6 @@ export class Order {
     } else {
       throw new Error("Quantity must be a positive number.");
     }
-  }
-    
-  public getProductList(): ProductItem[] {
-    return this._productList;
   }
     
   public printOrderDetails(): void {
@@ -104,7 +100,7 @@ export class Order {
     this._productList = value;
   }
 
-  get id(): number | undefined {
+  get id(): number {
     return this._id;
   }
 }
