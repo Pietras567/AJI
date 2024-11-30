@@ -10,7 +10,7 @@ export class Category {
     @Column("varchar")
     private _name: string;
 
-    @OneToMany(() => Product, (product) => product.category)
+    @OneToMany(() => Product, (item: Product) => item.category)
     private _products!: Product[];
 
     constructor(name: string) {

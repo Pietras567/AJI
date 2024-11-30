@@ -14,13 +14,14 @@ export class ProductItem {
     @ManyToOne(() => Product, { eager: true })
     private _product: Product;
 
-    @ManyToOne(() => Order, (order: Order) => order.productList)
-    private _order!: Order;
+    @ManyToOne(() => Order)
+    private _order: Order;
 
 
-    constructor(product: Product, quantity: number) {
+    constructor(product: Product, quantity: number, order: Order) {
         this._product = product;
         this._quantity = quantity;
+        this._order = order;
     }
 
     get product(): Product {

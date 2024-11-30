@@ -35,21 +35,21 @@ export class Order {
     this._orderDate = orderDate;
   }
     
-  public addProduct(product: Product, quantity: number): void {
-    if (quantity > 0) {
-      let item = new ProductItem(product, quantity);
-      item.order = this;
-      this._productList.push(item);
-    } else {
-      throw new Error("Quantity must be a positive number.");
-    }
-  }
-    
-  public printOrderDetails(): void {
-    this._productList.forEach(item => {
-      console.log(`Product: ${item.product.name}, Quantity: ${item.quantity}`);
-    });
-  }
+  // public addProduct(product: Product, quantity: number): void {
+  //   if (quantity > 0) {
+  //     let item = new ProductItem(product, quantity, this);
+  //     item.order = this;
+  //     this._productList.push(item);
+  //   } else {
+  //     throw new Error("Quantity must be a positive number.");
+  //   }
+  // }
+  //
+  // public printOrderDetails(): void {
+  //   this._productList.forEach(item => {
+  //     console.log(`Product: ${item.product.name}, Quantity: ${item.quantity}`);
+  //   });
+  // }
 
 
   get orderDate(): Date | undefined {

@@ -15,7 +15,7 @@ export class OrderStatus {
     private _currentStatus: string;
 
     @OneToMany(() => Order, (item: Order) => item.status, { cascade: true })
-    private _productList!: ProductItem[];
+    private _orders!: Order[];
 
     constructor(currentStatus: string) {
         this._currentStatus = currentStatus;
