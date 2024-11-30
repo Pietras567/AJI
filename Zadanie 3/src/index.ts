@@ -89,7 +89,7 @@ app.get('/products', async(req: Request, res: Response) => {
         const products = AppDataSource.getRepository(Product);
         res.json(await products.find());
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error fetching products:", error);
         res.status(500).send("Internal Server Error");
     }
 })
@@ -106,7 +106,7 @@ app.get('/products/:id', async(req: Request, res: Response) => {
             res.status(404).send("Product not found");
         }
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error fetching product:", error);
         res.status(500).send("Internal Server Error");
     }
 })
@@ -115,6 +115,24 @@ app.get('/products/:id', async(req: Request, res: Response) => {
 app.post('/products', async(req: Request, res: Response) => {
     try {
         const { _name, _description, _price, _weight, categoryId } = req.body;
+
+        if (!_name || _name.trim() === "") {
+            res.status(400).json({ error: "Product name cannot be empty." });
+            return
+        }
+        if (!_description || _description.trim() === "") {
+            res.status(400).json({ error: "Product description cannot be empty." });
+            return
+        }
+        if (!_price || _price <= 0) {
+            res.status(400).json({ error: "Product price must be greater than zero." });
+            return
+        }
+        if (!_weight || _weight <= 0) {
+            res.status(400).json({ error: "Product weight must be greater than zero." });
+            return
+        }
+
         const categories = AppDataSource.getRepository(Category);
         // @ts-ignore
         const _category = await categories.findOne({ where: { _id: categoryId } });
@@ -129,7 +147,7 @@ app.post('/products', async(req: Request, res: Response) => {
         await products.save(newProduct);
         res.status(201).json(newProduct);
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error adding product:", error);
         res.status(500).send("Internal Server Error");
     }
 })
@@ -138,6 +156,24 @@ app.post('/products', async(req: Request, res: Response) => {
 app.put('/products/:id', async(req: Request, res: Response) => {
     try {
         const { _name, _description, _price, _weight, categoryId } = req.body;
+
+        if (!_name || _name.trim() === "") {
+            res.status(400).json({ error: "Product name cannot be empty." });
+            return
+        }
+        if (!_description || _description.trim() === "") {
+            res.status(400).json({ error: "Product description cannot be empty." });
+            return
+        }
+        if (!_price || _price <= 0) {
+            res.status(400).json({ error: "Product price must be greater than zero." });
+            return
+        }
+        if (!_weight || _weight <= 0) {
+            res.status(400).json({ error: "Product weight must be greater than zero." });
+            return
+        }
+
         const products = AppDataSource.getRepository(Product);
         // @ts-ignore
         const product = await products.findOne({ where: { _id: parseInt(req.params.id) } });
@@ -160,10 +196,11 @@ app.put('/products/:id', async(req: Request, res: Response) => {
             await products.save(product);
             res.json(product);
         } else {
-            res.status(404).send("Product not found");
+            res.status(404).json({error: `Product with ID ${req.params.id} does not exist.`});
+            return;
         }
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error updating product:", error);
         res.status(500).send("Internal Server Error");
     }
 })
@@ -175,7 +212,7 @@ app.get('/categories', async(req: Request, res: Response) => {
         const categories = await categoriesRepository.find();
         res.json(categories);
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error fetching categories:", error);
         res.status(500).send("Internal Server Error");
     }
 });
@@ -212,8 +249,22 @@ app.get('/orders', async(req: Request, res: Response) => {
 //Dodaj zamówienie
 app.post('/orders', async(req: Request, res: Response) => {
     try {
-        //Pobranie i sprawdzenie kategorii
+        //Pobranie i sprawdzenie kategorii oraz pozostałych danych wejściowych
         const { statusId, userName, email, phone, orderDate, products } = req.body;
+
+        if (!userName || userName.trim() === "") {
+            res.status(400).json({ error: "User name cannot be empty." });
+            return
+        }
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+            res.status(400).json({ error: "Invalid email address." });
+            return
+        }
+        if (!phone || !/^\d{9}$/.test(phone)) {
+            res.status(400).json({ error: "Phone number must contain exactly 9 digits." });
+            return
+        }
+
         const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
 
         const status = await orderStatusRepository.findOne({
@@ -222,7 +273,7 @@ app.post('/orders', async(req: Request, res: Response) => {
         });
 
         if (!status) {
-            res.status(404).send("Status not found");
+            res.status(404).json({ error: `Order status with ID ${statusId} not found.` });
             return;
         }
 
@@ -252,7 +303,14 @@ app.post('/orders', async(req: Request, res: Response) => {
             // @ts-ignore
             const product = await productRepository.findOne({ where: { _id: productData.productId } });
             if (!product) {
-                res.status(404).send(`Product with ID ${productData.productId} not found`);
+                res.status(404).json({error: `Product with ID ${productData.productId} not found`});
+                return;
+            }
+
+            if (!productData.quantity || productData.quantity <= 0) {
+                res.status(400).json({
+                    error: `Product quantity for product ID ${productData.productId} must be greater than zero.`
+                });
                 return;
             }
 
@@ -279,7 +337,7 @@ app.post('/orders', async(req: Request, res: Response) => {
 
         res.status(201).json(JSON.parse(JSON.stringify(fullOrderDetails, replacer)));
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error adding order:", error);
         res.status(500).send("Internal Server Error");
     }
 });
@@ -306,7 +364,36 @@ app.patch('/orders/:id', async(req: Request, res: Response) => {
             const status = await orderStatusRepository.findOne({ where: { _id: statusId } });
 
             if (!status) {
-                res.status(404).send("Status not found");
+                res.status(404).json({error: `Order status with ID ${statusId} not found.`});
+                return;
+            }
+
+            // Definicja dozwolonych przejść statusów
+            const statusHierarchy: { [key: string]: number } = {
+                NotApproved: 1,
+                Approved: 2,
+                Executed: 3,
+                Cancelled: 4,
+            };
+
+            const currentStatusLevel = statusHierarchy[order.status.currentStatus];
+            const newStatusLevel = statusHierarchy[status.currentStatus];
+
+            // Walidacja przejścia między statusami
+            if (currentStatusLevel === 4 || currentStatusLevel === 3) {
+                res.status(400).json({
+                    error: `Cannot change status from '${order.status.currentStatus}' as it is a final status.`,
+                });
+                return;
+            }
+
+            if (
+                currentStatusLevel > newStatusLevel &&
+                !(currentStatusLevel !== 4 && status.currentStatus === "Cancelled")
+            ) {
+                res.status(400).json({
+                    error: `Invalid status transition from '${order.status.currentStatus}' to '${status.currentStatus}'.`,
+                });
                 return;
             }
 
@@ -314,13 +401,13 @@ app.patch('/orders/:id', async(req: Request, res: Response) => {
             await orderRepository.save(order);
             res.json(order);
         } else {
-            res.status(404).send("Order not found");
+            res.status(404).json({ error: `Order with ID ${req.params.id} not found.` });
             return;
         }
 
 
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error updating order: ", error);
         res.status(500).send("Internal Server Error");
     }
 });
@@ -365,7 +452,7 @@ app.get('/status', async(req: Request, res: Response) => {
         const orderStatuses = await orderStatusRepository.find();
         res.json(orderStatuses);
     } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error fetching order statuses:", error);
         res.status(500).send("Internal Server Error");
     }
 });
