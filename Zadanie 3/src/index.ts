@@ -6,6 +6,7 @@ import {Category} from './entities/Category';
 import {Order} from './entities/Order';
 import {Product} from './entities/Product';
 import {OrderStatus} from './entities/OrderStatus';
+import {User} from "./entities/User"
 import "reflect-metadata";
 
 
@@ -52,6 +53,7 @@ async function addProductAndOrder() {
     const productRepository = AppDataSource.getRepository(Product);
     const orderRepository = AppDataSource.getRepository(Order);
     const statusRepository = AppDataSource.getRepository(OrderStatus);
+    const userRepository = AppDataSource.getRepository(User);
 
     const category = new Category("Electronics");
     await categoryRepository.save(category);
@@ -62,7 +64,7 @@ async function addProductAndOrder() {
     console.log("Product saved:", product);
 
     // Create or find status
-    const status = new OrderStatus("Approved");
+    const status = new OrderStatus("Executed");
     await statusRepository.save(status);
 
     // Get a product
@@ -71,8 +73,12 @@ async function addProductAndOrder() {
         where: { _id: 1 },
     });
 
+    // Create an user
+    const user = new User("John Doe", "john@example.com", "123456789")
+    await userRepository.save(user);
+
     // Create an order
-    const order = new Order(status, "John Doe", "john@example.com", "1234567890", new Date());
+    const order = new Order(status, user, new Date());
 
     // Create product item
     const productItem = new ProductItem(product2!, 2, order);
@@ -246,11 +252,10 @@ app.get('/orders', async(req: Request, res: Response) => {
 });
 
 
-//Dodaj zamówienie
-app.post('/orders', async(req: Request, res: Response) => {
+app.post('/users', async(req: Request, res: Response) => {
     try {
-        //Pobranie i sprawdzenie kategorii oraz pozostałych danych wejściowych
-        const { statusId, userName, email, phone, orderDate, products } = req.body;
+        //Pobranie i sprawdzenie danych wejściowych
+        const { userName, email, phone } = req.body;
 
         if (!userName || userName.trim() === "") {
             res.status(400).json({ error: "User name cannot be empty." });
@@ -265,6 +270,19 @@ app.post('/orders', async(req: Request, res: Response) => {
             return
         }
 
+    } catch (error) {
+        console.error("Error adding user:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+//Dodaj zamówienie
+app.post('/orders', async(req: Request, res: Response) => {
+    try {
+        const { statusId, userId, orderDate, products } = req.body;
+
+        //Pobranie i sprawdzenie kategorii
         const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
 
         const status = await orderStatusRepository.findOne({
@@ -277,23 +295,32 @@ app.post('/orders', async(req: Request, res: Response) => {
             return;
         }
 
-        //Dodanie zamówienia
+        // Pobranie i sprawdzenie użytkownika
+        const userRepository = AppDataSource.getRepository(User);
 
+        const user = await userRepository.findOne({
+            // @ts-ignore
+            where: { _id: userId }
+        });
+
+        if (!user) {
+            res.status(404).json({ error: `User with ID ${userId} not found.` });
+            return;
+        }
+
+        //Dodanie zamówienia
         const orderRepository = AppDataSource.getRepository(Order);
 
         // @ts-ignore
         const order = orderRepository.create({
             _status: status,
-            _userName: userName,
-            _email: email,
-            _phone: phone,
+            _user: user,
             _orderDate: new Date(orderDate),
         });
 
         await orderRepository.save(order);
 
         //Dodanie produktów do zamówienia
-
         const productItemRepository = AppDataSource.getRepository(ProductItem);
         const productRepository = AppDataSource.getRepository(Product);
 

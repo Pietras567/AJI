@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from "ty
 import {OrderStatus} from "./OrderStatus"
 import {Product} from "./Product"
 import {ProductItem} from "./ProductItem";
+import {User} from "./User"
 
 
 @Entity("Orders")
@@ -12,45 +13,20 @@ export class Order {
   @Column("timestamp")
   private _orderDate?: Date;
 
-  @Column("varchar")
-  private _userName: string;
-
-  @Column("varchar")
-  private _email: string;
-
-  @Column("varchar")
-  private _phone: string;
-
   @ManyToOne(() => OrderStatus, { eager: true })
   private _status: OrderStatus;
+
+  @ManyToOne(() => User, { eager: true })
+  private _user: User;
 
   @OneToMany(() => ProductItem, (item: ProductItem) => item.order, { cascade: true })
   private _productList!: ProductItem[];
 
-  constructor(status: OrderStatus, userName: string, email: string, phone: string, orderDate?: Date) {
+  constructor(status: OrderStatus, user: User, orderDate?: Date) {
     this._status = status;
-    this._userName = userName;
-    this._email = email;
-    this._phone = phone;
+    this._user = user;
     this._orderDate = orderDate;
   }
-    
-  // public addProduct(product: Product, quantity: number): void {
-  //   if (quantity > 0) {
-  //     let item = new ProductItem(product, quantity, this);
-  //     item.order = this;
-  //     this._productList.push(item);
-  //   } else {
-  //     throw new Error("Quantity must be a positive number.");
-  //   }
-  // }
-  //
-  // public printOrderDetails(): void {
-  //   this._productList.forEach(item => {
-  //     console.log(`Product: ${item.product.name}, Quantity: ${item.quantity}`);
-  //   });
-  // }
-
 
   get orderDate(): Date | undefined {
     return this._orderDate;
@@ -68,28 +44,12 @@ export class Order {
     this._status = value;
   }
 
-  get userName(): string {
-    return this._userName;
+  get user(): User {
+    return this._user;
   }
 
-  set userName(value: string) {
-    this._userName = value;
-  }
-
-  get email(): string {
-    return this._email;
-  }
-
-  set email(value: string) {
-    this._email = value;
-  }
-
-  get phone(): string {
-    return this._phone;
-  }
-
-  set phone(value: string) {
-    this._phone = value;
+  set user(value: User) {
+    this._user = value;
   }
 
   get productList(): ProductItem[] {
