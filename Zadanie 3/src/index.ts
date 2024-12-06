@@ -9,6 +9,7 @@ import {OrderStatus} from './entities/OrderStatus';
 import {User} from "./entities/User"
 import "reflect-metadata";
 import axios from "axios";
+import {Opinion} from "./entities/Opinion";
 
 
 const AppDataSource = new DataSource({
@@ -21,7 +22,7 @@ const AppDataSource = new DataSource({
     synchronize: true,
     logging: true,
     // entities: ['./entities/*.{js,ts}'],
-    entities: [Category, ProductItem, Order, Product, OrderStatus, User],
+    entities: [Category, ProductItem, Order, Product, OrderStatus, User, Opinion],
 
 });
 
@@ -516,6 +517,7 @@ Do NOT add any unnecessary comments or notes regarding the generated code.
 Always respond in English.
 
 `;
+// prompt generated using chatGPT
 
     const requestBody = {
         model: 'llama3-8b-8192',
@@ -644,6 +646,59 @@ app.post("/init", async (req: Request, res: Response) => {
     }
 });
 
+// D4
+// Dodawanie opinii po zakupie
+
+// @ts-ignore
+app.post('/orders/:id/opinions', async (req: Request, res: Response) => {
+    // const { id } = req.params;
+    const {rating, content} = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({error: "Rating must be an integer between 1 and 5"});
+    }
+
+    if (!content || content.trim() === "") {
+        return res.status(400).json({error: "Content cannot be empty"});
+    }
+
+    try {
+        const orderRepository = AppDataSource.getRepository(Order);
+        const opinionRepository = AppDataSource.getRepository(Opinion);
+
+        // Pobierz zamówienie
+        const order = await orderRepository.findOne({
+            // @ts-ignore
+            where: {_id: parseInt(req.params.id)},
+            relations: ["_user", "_opinions"],
+
+
+        });
+
+        if (!order) {
+            return res.status(404).json({error: "Order not found"});
+        }
+
+        const allowedStatuses = ["Executed", "Cancelled"]
+        if (!allowedStatuses.includes((order.status.currentStatus))) {
+            return res.status(400).json({error: "Cannot add opinion to an order that is not completed or cancelled"});
+        }
+
+        // if (req.user.id !== order.user.id) {
+        //     return res.status(403).json({ error: "You can only add opinions to your own orders" });
+        // }
+
+
+        const newOpinion = new Opinion(rating, content, order);
+
+        await opinionRepository.save(newOpinion);
+
+        return res.status(201).json(newOpinion);
+    } catch (error) {
+        console.error("Error adding opinion:", error);
+        res.status(500).json({error: "Internal Server Error"});
+    }
+});
 
 startServer();
 // addProductAndOrder();
