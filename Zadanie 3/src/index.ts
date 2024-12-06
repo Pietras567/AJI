@@ -1,8 +1,8 @@
-import express, { Request, Response } from 'express';
+import express, {Request, Response} from 'express';
 import bodyParser from 'body-parser';
 import {DataSource} from "typeorm";
 import {ProductItem} from "./entities/ProductItem";
-import {Category} from './entities/Category';
+import {Category} from "./entities/Category";
 import {Order} from './entities/Order';
 import {Product} from './entities/Product';
 import {OrderStatus} from './entities/OrderStatus';
@@ -19,8 +19,11 @@ const AppDataSource = new DataSource({
     database: "AJI_3DB",
     synchronize: true,
     logging: true,
-    entities: ["./entities/*.ts"],
+    // entities: ['./entities/*.{js,ts}'],
+    entities: [Category, ProductItem, Order, Product, OrderStatus, User],
+
 });
+
 
 const app = express();
 app.use(bodyParser.json());
@@ -60,8 +63,8 @@ async function addProductAndOrder() {
 
     const product = new Product("Smartphone", "High-end smartphone", 999.99, 0.5, category);
 
-    await productRepository.save(product);
-    console.log("Product saved:", product);
+    // await productRepository.save(product);
+    // console.log("Product saved:", product);
 
     // Create or find status
     const status = new OrderStatus("Executed");
@@ -70,7 +73,7 @@ async function addProductAndOrder() {
     // Get a product
     const product2 = await productRepository.findOne({
         // @ts-ignore
-        where: { _id: 1 },
+        where: {_id: 1},
     });
 
     // Create an user
@@ -90,7 +93,7 @@ async function addProductAndOrder() {
 }
 
 //Pobierz produkty
-app.get('/products', async(req: Request, res: Response) => {
+app.get('/products', async (req: Request, res: Response) => {
     try {
         const products = AppDataSource.getRepository(Product);
         res.json(await products.find());
@@ -101,11 +104,11 @@ app.get('/products', async(req: Request, res: Response) => {
 })
 
 //Pobierz produkt po id
-app.get('/products/:id', async(req: Request, res: Response) => {
+app.get('/products/:id', async (req: Request, res: Response) => {
     try {
         const products = AppDataSource.getRepository(Product);
         // @ts-ignore
-        const findProduct = await products.findOne({ where: { _id: parseInt(req.params.id) } });
+        const findProduct = await products.findOne({where: {_id: parseInt(req.params.id)}});
         if (findProduct) {
             res.json(findProduct);
         } else {
@@ -118,38 +121,38 @@ app.get('/products/:id', async(req: Request, res: Response) => {
 })
 
 //Dodaj produkt
-app.post('/products', async(req: Request, res: Response) => {
+app.post('/products', async (req: Request, res: Response) => {
     try {
-        const { _name, _description, _price, _weight, categoryId } = req.body;
+        const {_name, _description, _price, _weight, categoryId} = req.body;
 
         if (!_name || _name.trim() === "") {
-            res.status(400).json({ error: "Product name cannot be empty." });
+            res.status(400).json({error: "Product name cannot be empty."});
             return
         }
         if (!_description || _description.trim() === "") {
-            res.status(400).json({ error: "Product description cannot be empty." });
+            res.status(400).json({error: "Product description cannot be empty."});
             return
         }
         if (!_price || _price <= 0) {
-            res.status(400).json({ error: "Product price must be greater than zero." });
+            res.status(400).json({error: "Product price must be greater than zero."});
             return
         }
         if (!_weight || _weight <= 0) {
-            res.status(400).json({ error: "Product weight must be greater than zero." });
+            res.status(400).json({error: "Product weight must be greater than zero."});
             return
         }
 
         const categories = AppDataSource.getRepository(Category);
         // @ts-ignore
-        const _category = await categories.findOne({ where: { _id: categoryId } });
-        if(!_category) {
+        const _category = await categories.findOne({where: {_id: categoryId}});
+        if (!_category) {
             res.status(404).send("Category not found");
             return;
         }
 
         const products = AppDataSource.getRepository(Product);
         // @ts-ignore
-        const newProduct = products.create({ _name, _description, _price, _weight, _category });
+        const newProduct = products.create({_name, _description, _price, _weight, _category});
         await products.save(newProduct);
         res.status(201).json(newProduct);
     } catch (error) {
@@ -159,36 +162,36 @@ app.post('/products', async(req: Request, res: Response) => {
 })
 
 //Aktualizuj product
-app.put('/products/:id', async(req: Request, res: Response) => {
+app.put('/products/:id', async (req: Request, res: Response) => {
     try {
-        const { _name, _description, _price, _weight, categoryId } = req.body;
+        const {_name, _description, _price, _weight, categoryId} = req.body;
 
         if (!_name || _name.trim() === "") {
-            res.status(400).json({ error: "Product name cannot be empty." });
+            res.status(400).json({error: "Product name cannot be empty."});
             return
         }
         if (!_description || _description.trim() === "") {
-            res.status(400).json({ error: "Product description cannot be empty." });
+            res.status(400).json({error: "Product description cannot be empty."});
             return
         }
         if (!_price || _price <= 0) {
-            res.status(400).json({ error: "Product price must be greater than zero." });
+            res.status(400).json({error: "Product price must be greater than zero."});
             return
         }
         if (!_weight || _weight <= 0) {
-            res.status(400).json({ error: "Product weight must be greater than zero." });
+            res.status(400).json({error: "Product weight must be greater than zero."});
             return
         }
 
         const products = AppDataSource.getRepository(Product);
         // @ts-ignore
-        const product = await products.findOne({ where: { _id: parseInt(req.params.id) } });
+        const product = await products.findOne({where: {_id: parseInt(req.params.id)}});
 
-        if(product) {
+        if (product) {
             const categories = AppDataSource.getRepository(Category);
             // @ts-ignore
-            const _category = await categories.findOne({ where: { _id: categoryId } });
-            if(!_category) {
+            const _category = await categories.findOne({where: {_id: categoryId}});
+            if (!_category) {
                 res.status(404).send("Category not found");
                 return;
             }
@@ -212,7 +215,7 @@ app.put('/products/:id', async(req: Request, res: Response) => {
 })
 
 //Pobierz kategorie
-app.get('/categories', async(req: Request, res: Response) => {
+app.get('/categories', async (req: Request, res: Response) => {
     try {
         const categoriesRepository = AppDataSource.getRepository(Category);
         const categories = await categoriesRepository.find();
@@ -224,9 +227,8 @@ app.get('/categories', async(req: Request, res: Response) => {
 });
 
 
-
 //Pobierz zamówienia
-app.get('/orders', async(req: Request, res: Response) => {
+app.get('/orders', async (req: Request, res: Response) => {
     try {
         const ordersRepository = AppDataSource.getRepository(Order);
         const productItemRepository = AppDataSource.getRepository(ProductItem);
@@ -240,7 +242,7 @@ app.get('/orders', async(req: Request, res: Response) => {
                     relations: ["_product"]
                 });
 
-                return { ...order, productList: productItems };
+                return {...order, productList: productItems};
             })
         );
 
@@ -252,21 +254,21 @@ app.get('/orders', async(req: Request, res: Response) => {
 });
 
 
-app.post('/users', async(req: Request, res: Response) => {
+app.post('/users', async (req: Request, res: Response) => {
     try {
         //Pobranie i sprawdzenie danych wejściowych
-        const { userName, email, phone } = req.body;
+        const {userName, email, phone} = req.body;
 
         if (!userName || userName.trim() === "") {
-            res.status(400).json({ error: "User name cannot be empty." });
+            res.status(400).json({error: "User name cannot be empty."});
             return
         }
         if (!email || !/\S+@\S+\.\S+/.test(email)) {
-            res.status(400).json({ error: "Invalid email address." });
+            res.status(400).json({error: "Invalid email address."});
             return
         }
         if (!phone || !/^\d{9}$/.test(phone)) {
-            res.status(400).json({ error: "Phone number must contain exactly 9 digits." });
+            res.status(400).json({error: "Phone number must contain exactly 9 digits."});
             return
         }
 
@@ -278,20 +280,20 @@ app.post('/users', async(req: Request, res: Response) => {
 
 
 //Dodaj zamówienie
-app.post('/orders', async(req: Request, res: Response) => {
+app.post('/orders', async (req: Request, res: Response) => {
     try {
-        const { statusId, userId, orderDate, products } = req.body;
+        const {statusId, userId, orderDate, products} = req.body;
 
         //Pobranie i sprawdzenie kategorii
         const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
 
         const status = await orderStatusRepository.findOne({
             // @ts-ignore
-            where: { _id: statusId }
+            where: {_id: statusId}
         });
 
         if (!status) {
-            res.status(404).json({ error: `Order status with ID ${statusId} not found.` });
+            res.status(404).json({error: `Order status with ID ${statusId} not found.`});
             return;
         }
 
@@ -300,11 +302,11 @@ app.post('/orders', async(req: Request, res: Response) => {
 
         const user = await userRepository.findOne({
             // @ts-ignore
-            where: { _id: userId }
+            where: {_id: userId}
         });
 
         if (!user) {
-            res.status(404).json({ error: `User with ID ${userId} not found.` });
+            res.status(404).json({error: `User with ID ${userId} not found.`});
             return;
         }
 
@@ -328,7 +330,7 @@ app.post('/orders', async(req: Request, res: Response) => {
 
         for (const productData of products) {
             // @ts-ignore
-            const product = await productRepository.findOne({ where: { _id: productData.productId } });
+            const product = await productRepository.findOne({where: {_id: productData.productId}});
             if (!product) {
                 res.status(404).json({error: `Product with ID ${productData.productId} not found`});
                 return;
@@ -342,7 +344,11 @@ app.post('/orders', async(req: Request, res: Response) => {
             }
 
             // @ts-ignore
-            const productItem = productItemRepository.create({ _product: product, _quantity: productData.quantity, _order: order });
+            const productItem = productItemRepository.create({
+                _product: product,
+                _quantity: productData.quantity,
+                _order: order
+            });
             //console.log(productItem);
 
             productReturnList.push(productItem);
@@ -356,7 +362,7 @@ app.post('/orders', async(req: Request, res: Response) => {
             }
             return value;
         }
-        
+
         const fullOrderDetails = {
             ...order,
             productList: productReturnList
@@ -370,17 +376,15 @@ app.post('/orders', async(req: Request, res: Response) => {
 });
 
 
-
-
 //Edytuj zamówienie
-app.patch('/orders/:id', async(req: Request, res: Response) => {
+app.patch('/orders/:id', async (req: Request, res: Response) => {
     try {
-        const { statusId } = req.body;
+        const {statusId} = req.body;
         const orderRepository = AppDataSource.getRepository(Order);
 
         const order = await orderRepository.findOne({
             // @ts-ignore
-            where: { _id: parseInt(req.params.id) },
+            where: {_id: parseInt(req.params.id)},
             relations: ["_status"]
         });
 
@@ -388,7 +392,7 @@ app.patch('/orders/:id', async(req: Request, res: Response) => {
         if (order) {
             const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
             // @ts-ignore
-            const status = await orderStatusRepository.findOne({ where: { _id: statusId } });
+            const status = await orderStatusRepository.findOne({where: {_id: statusId}});
 
             if (!status) {
                 res.status(404).json({error: `Order status with ID ${statusId} not found.`});
@@ -428,7 +432,7 @@ app.patch('/orders/:id', async(req: Request, res: Response) => {
             await orderRepository.save(order);
             res.json(order);
         } else {
-            res.status(404).json({ error: `Order with ID ${req.params.id} not found.` });
+            res.status(404).json({error: `Order with ID ${req.params.id} not found.`});
             return;
         }
 
@@ -440,26 +444,25 @@ app.patch('/orders/:id', async(req: Request, res: Response) => {
 });
 
 
-
 //Pobierz zamówienia z określonym stanem
-app.get('/orders/status/:id', async(req: Request, res: Response) => {
+app.get('/orders/status/:id', async (req: Request, res: Response) => {
     try {
         const ordersRepository = AppDataSource.getRepository(Order);
         const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
 
         const orderStatus = await orderStatusRepository.findOne({
             // @ts-ignore
-            where: { _id: parseInt(req.params.id) }
+            where: {_id: parseInt(req.params.id)}
         })
         //console.log(orderStatus)
-        if(!orderStatus) {
+        if (!orderStatus) {
             res.status(404).send("Status not found");
             return;
         }
 
         const orders = await ordersRepository.find({
             // @ts-ignore
-            where: { _status: orderStatus }
+            where: {_status: orderStatus}
         });
 
         res.json(orders);
@@ -470,10 +473,8 @@ app.get('/orders/status/:id', async(req: Request, res: Response) => {
 });
 
 
-
-
 //Pobierz dozwolone stany zamówień
-app.get('/status', async(req: Request, res: Response) => {
+app.get('/status', async (req: Request, res: Response) => {
     try {
         const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
         const orderStatuses = await orderStatusRepository.find();
@@ -484,5 +485,59 @@ app.get('/status', async(req: Request, res: Response) => {
     }
 });
 
+//Inicjalizuj towary bazy danych z pliku
+// @ts-ignore
+app.post("/init", async (req: Request, res: Response) => {
+    try {
+        const productData = req.body; // Zawiera listę produktów (dane JSON)
+
+        // Sprawdzamy, czy w bazie danych już istnieją produkty
+        const existingProducts = await AppDataSource.getRepository(Product).find();
+
+        if (existingProducts.length > 0) {
+            return res.status(400).json({ error: "Database already contains products." });
+        }
+
+        // Proces inicjalizacji danych produktów
+        for (let data of productData) {
+            const {_name, _description, _price, _weight, categoryId} = data;
+
+            // Walidacja danych, jeśli jest to potrzebne
+            if (!_name || _name.trim() === "") {
+                return res.status(400).json({ error: "Product name cannot be empty." });
+            }
+            if (!_description || _description.trim() === "") {
+                return res.status(400).json({ error: "Product description cannot be empty." });
+            }
+            if (!_price || _price <= 0) {
+                return res.status(400).json({ error: "Product price must be greater than zero." });
+            }
+            if (!_weight || _weight <= 0) {
+                return res.status(400).json({ error: "Product weight must be greater than zero." });
+            }
+
+            const categories = AppDataSource.getRepository(Category);
+            // @ts-ignore
+            const _category = await categories.findOne({where: {_id: categoryId}});
+            if (!_category) {
+                res.status(404).send("Category not found");
+                return;
+            }
+
+            // Tworzymy nowy produkt
+            const newProduct = new Product(_name, _description, _price, _weight, _category);
+
+            // Zapisujemy produkt do bazy danych
+            await AppDataSource.getRepository(Product).save(newProduct);
+        }
+
+        return res.status(200).json({ message: "Products initialized." });
+    } catch (error) {
+        // console.error("Error during product initialization:", error);
+        return res.status(500).json({ error: "Error occured." });
+    }
+});
+
+
 startServer();
-addProductAndOrder();
+// addProductAndOrder();
