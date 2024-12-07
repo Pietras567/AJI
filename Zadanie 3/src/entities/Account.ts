@@ -8,7 +8,7 @@ export class Account {
     @PrimaryGeneratedColumn()
     _id!: number;
 
-    @Column({ unique: true })
+    @Column({ unique: true, type: "varchar" })
     _username: string;
 
     @Column("varchar")

@@ -13,6 +13,8 @@ import {Opinion} from "./entities/Opinion";
 import {Account} from "./entities/Account";
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+require('dotenv').config({path: './secret.env'});
+dotenv.config();
 
 
 const AppDataSource = new DataSource({
@@ -598,6 +600,9 @@ app.get('/products/:id/seo-description', async (req: Request, res: Response) => 
 // Uwierzytelnianie do aplikacji
 
 async function createAccounts() {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    await sleep(5000);
+
     const accountRepository = AppDataSource.getRepository(Account);
     const userRepository = AppDataSource.getRepository(User);
 
@@ -625,10 +630,16 @@ app.post('/login', async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
     try {
+        //const secret = process.env.JWT_SECRET
+        //console.log(secret)
+        //const expire = process.env.JWT_EXPIRATION
+        //console.log(expire)
+        //console.log(process.env)
+
         const accountRepository = AppDataSource.getRepository(Account);
 
         // @ts-ignore
-        const account = await accountRepository.findOne({ where: { username } });
+        const account = await accountRepository.findOne({ where: { _username: username } });
 
         if (!account || !(await account.validatePassword(password))) {
             return res.status(401).json({ error: "Invalid username or password" });
@@ -804,7 +815,6 @@ app.post('/orders/:id/opinions',authenticateJWT(["CLIENT"]), async (req: Request
     }
 });
 
-dotenv.config();
 startServer();
-createAccounts();
-// addProductAndOrder();
+//createAccounts();
+//addProductAndOrder();
