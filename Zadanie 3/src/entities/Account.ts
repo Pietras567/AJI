@@ -14,10 +14,7 @@ export class Account {
     @Column("varchar")
     _password: string;
 
-    @Column({
-        type: "enum",
-        enum: ["CLIENT", "MANAGER"],
-    })
+    @Column({ type: "varchar" })
     _accountType: string;
 
 

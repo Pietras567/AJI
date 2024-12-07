@@ -13,6 +13,7 @@ import {Opinion} from "./entities/Opinion";
 import {Account} from "./entities/Account";
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+
 require('dotenv').config({path: './secret.env'});
 dotenv.config();
 
@@ -605,21 +606,46 @@ async function createAccounts() {
 
     const accountRepository = AppDataSource.getRepository(Account);
     const userRepository = AppDataSource.getRepository(User);
+    const orderRepository = AppDataSource.getRepository(Order);
+    const productRepository = AppDataSource.getRepository(Product);
+    const statusRepository = AppDataSource.getRepository(OrderStatus);
+// // Tworzymy konto "CLIENT"
+//     const clientAccount = new Account("sigmaAccount", "haselko123", "CLIENT");
+//     await clientAccount.hashPassword();
+//     await accountRepository.save(clientAccount);
+//
+// // Tworzymy użytkownika przypisanego do konta "CLIENT"
+//     const clientUser = new User("mala sigiemka", "sigma@example.pl", "123456789", clientAccount);
+//     await userRepository.save(clientUser);
 
-// Tworzymy konto "CLIENT"
-    const clientAccount = new Account("clientUser", "password123", "CLIENT");
-    await clientAccount.hashPassword();
-    await accountRepository.save(clientAccount);
+    // Get a product
+    const product2 = await productRepository.findOne({
+        // @ts-ignore
+        where: {_id: 1},
+    });
 
-// Tworzymy użytkownika przypisanego do konta "CLIENT"
-    const clientUser = new User("John Bbby", "john@example.com", "123456789", clientAccount);
-    await userRepository.save(clientUser);
+    const user123 = await userRepository.findOne({
+        // @ts-ignore
+        where: {_id: 4},
+    }) as User; ;
 
-// Haszujemy hasło konta
+    const status123 = await statusRepository.findOne({
+        // @ts-ignore
+        where: {_id: 2},
+    }) as OrderStatus;
+
+// Create an order
 
 
-// Zapisujemy dane w bazie danych
+    const order = new Order(status123, user123, new Date());
 
+    // Create product item
+    const productItem = new ProductItem(product2!, 2, order);
+
+    order.productList = [productItem];
+
+    await orderRepository.save(order);
+    console.log("Order saved:", order);
 
 
 }
@@ -627,7 +653,11 @@ async function createAccounts() {
 
 // @ts-ignore
 app.post('/login', async (req: Request, res: Response) => {
-    const { username, password } = req.body;
+    const {username, password} = req.body;
+
+    const secretKey = "213742069"
+    const expireTime = "1h"
+
 
     try {
         //const secret = process.env.JWT_SECRET
@@ -639,19 +669,26 @@ app.post('/login', async (req: Request, res: Response) => {
         const accountRepository = AppDataSource.getRepository(Account);
 
         // @ts-ignore
-        const account = await accountRepository.findOne({ where: { _username: username } });
+        const account = await accountRepository.findOne({where: {_username: username}});
 
         if (!account || !(await account.validatePassword(password))) {
-            return res.status(401).json({ error: "Invalid username or password" });
+            return res.status(401).json({error: "Invalid username or password"});
         }
 
+        // const token = jwt.sign(
+        //     { id: account._id, username: account._username, accountType: account._accountType },
+        //     process.env.JWT_SECRET!,
+        //     { expiresIn: process.env.JWT_EXPIRATION }
+        // );
+
         const token = jwt.sign(
-            { id: account._id, username: account._username, accountType: account._accountType },
-            process.env.JWT_SECRET!,
-            { expiresIn: process.env.JWT_EXPIRATION }
+            {id: account._id, username: account._username, accountType: account._accountType},
+            secretKey,
+            {expiresIn: expireTime}
         );
 
-        res.status(200).json({ token });
+
+        res.status(200).json({token});
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).send("Internal Server Error");
@@ -664,46 +701,67 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ error: "Unauthorized" });
+            return res.status(401).json({error: "Unauthorized"});
         }
 
         const token = authHeader.split(" ")[1];
 
         try {
+
+            const secretKey = "213742069"
+            const expireTime = "1h"
+
             // Weryfikacja tokenu
-            const decoded  = jwt.verify(token, process.env.JWT_SECRET!);
-            const accountId = (<any>decoded)._id;
+            // const decoded  = jwt.verify(token, process.env.JWT_SECRET!);
+            const decoded = jwt.verify(token, secretKey);
+
+            console.log("Payload:", decoded);
+
+            type JwtPayload = {
+                id: number;
+                username: string;
+                accountType: string;
+                iat?: number; // Opcjonalne: czas wystawienia tokena (issued at)
+                exp?: number; // Opcjonalne: czas wygaśnięcia tokena (expiration)
+            };
+
+            const payload = decoded as JwtPayload;
+
+            const accountId = payload.id;
 
             // Pobieramy użytkownika z bazy danych, ładując jego konto
-            const userRepository = AppDataSource.getRepository(User);
+            // const userRepository = AppDataSource.getRepository(User);
+            const accountRepository = AppDataSource.getRepository(Account);
 
-            const user = await userRepository.findOne({
+            const account = await accountRepository.findOne({
                 // @ts-ignore
-                where: { _id: accountId },
-                relations: ['_user'],
+                where: {_id: accountId},
+                // relations: ['_user'],
             });
 
-            if (!user) {
-                return res.status(404).json({ error: "Account not found" });
+            if (!account) {
+                return res.status(404).json({error: "Account not found"});
             }
 
-            // Jeśli sprawdzamy rolę, sprawdzamy, czy użytkownik ma odpowiednią rolę
-            if (allowedRoles && !allowedRoles.includes(user.account._accountType)) {
-                return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
-            }
-            res.locals = accountId;
 
-            // Jeśli wszystko jest w porządku, przechodzimy do następnego middleware lub endpointu
+            if (allowedRoles != null) {
+                // Jeśli sprawdzamy rolę, sprawdzamy, czy użytkownik ma odpowiednią rolę
+                if (allowedRoles && !allowedRoles.includes(account._accountType)) {
+                    return res.status(403).json({error: "Forbidden: Insufficient permissions"});
+                }
+            }
+            console.log("++++++++++++++++++++++++++++++++++++++++++++++: " + accountId);
+            res.locals.accountId = accountId;
+            console.log("==============================================: " + res.locals.accountId);
             next();
         } catch (error) {
             console.error(error);
-            return res.status(403).json({ error: "Invalid or expired token" });
+            return res.status(403).json({error: "Invalid or expired token"});
         }
     };
 };
 
 //nie testowalem!
-
 
 
 //D3
@@ -764,7 +822,7 @@ app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Respon
 // Dodawanie opinii po zakupie
 
 // @ts-ignore
-app.post('/orders/:id/opinions',authenticateJWT(["CLIENT"]), async (req: Request, res: Response) => {
+app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Request, res: Response) => {
     // const { id } = req.params;
     const {rating, content} = req.body;
 
@@ -779,28 +837,39 @@ app.post('/orders/:id/opinions',authenticateJWT(["CLIENT"]), async (req: Request
     try {
         const orderRepository = AppDataSource.getRepository(Order);
         const opinionRepository = AppDataSource.getRepository(Opinion);
+        const userRepository = AppDataSource.getRepository(User);
 
         // Pobierz zamówienie
-        const order = await orderRepository.findOne({
+        const order = (await orderRepository.findOne({
             // @ts-ignore
             where: {_id: parseInt(req.params.id)},
             relations: ["_user", "_opinions"],
+        })) as Order;
 
-        });
+
+        const userFromOrder = (await userRepository.findOne({
+            // @ts-ignore
+            where: {_id: order._user.id},
+            relations: ["_account"],
+        })) as User;
+
 
         if (!order) {
             return res.status(404).json({error: "Order not found"});
         }
 
+        // console.log("------------------------------------------------------------ : " + JSON.stringify(userFromOrder, null, 2));
+        // console.log("------------------------------------------------------------ : " + JSON.stringify(userFromOrder._account, null, 2));
+        // @ts-ignore
+        console.log("Order: " + JSON.stringify(order, null, 2))
+
+        if (res.locals.accountId !== userFromOrder._account._id) {
+            return res.status(403).json({error: "You can only add opinions to your own orders"});
+        }
+
         const allowedStatuses = ["Executed", "Cancelled"]
         if (!allowedStatuses.includes((order.status.currentStatus))) {
             return res.status(400).json({error: "Cannot add opinion to an order that is not completed or cancelled"});
-        }
-
-        //moga byc problemy tutaj
-        // @ts-ignore
-        if (res.locals !== order.user.account._id) {
-            return res.status(403).json({ error: "You can only add opinions to your own orders" });
         }
 
 
@@ -815,6 +884,64 @@ app.post('/orders/:id/opinions',authenticateJWT(["CLIENT"]), async (req: Request
     }
 });
 
+// @ts-ignore
+app.post("/refresh-token", async (req: Request, res: Response) => {
+    const authHeader = req.headers.authorization;
+
+    const secretKey = "213742069"
+    const expireTime = "1h"
+
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized: No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        // Weryfikacja tokenu
+        // const decoded = jwt.verify(token, process.env.JWT_SECRET!, { ignoreExpiration: false }) as {
+        const decoded = jwt.decode(token) as { id: number; username: string; accountType: string; exp: number };
+        // Pobranie użytkownika z bazy danych
+        const accountRepository = AppDataSource.getRepository(Account);
+        const account = await accountRepository.findOne({ where: { _id: decoded.id } });
+
+        if (!account) {
+            return res.status(404).json({ error: "Account not found" });
+        }
+
+        // Sprawdzenie czasu ważności tokenu
+        const now = Math.floor(Date.now() / 1000);
+        const timeLeft = decoded.exp - now; // Pozostały czas w sekundach
+
+        if (timeLeft > 30 * 60) {
+            // Jeśli do wygaśnięcia zostało więcej niż 30 minut, odrzuć żądanie
+            return res.status(400).json({ message: "Token is not close to expiring" });
+        }
+
+        // Generowanie nowego tokenu
+        // const newToken = jwt.sign(
+        //     { id: account._id, username: account._username, accountType: account._accountType },
+        //     process.env.JWT_SECRET!,
+        //     { expiresIn: process.env.JWT_EXPIRATION }
+        // );
+        const newToken = jwt.sign(
+            { id: account._id, username: account._username, accountType: account._accountType },
+            secretKey!,
+            { expiresIn: expireTime }
+        );
+
+        return res.status(200).json({ token: newToken });
+    } catch (error) {
+        console.error("Token refresh error:", error);
+        return res.status(403).json({ error: "Invalid or expired token" });
+    }
+});
+
+
+
 startServer();
-//createAccounts();
+// createAccounts();
+
+
 //addProductAndOrder();
