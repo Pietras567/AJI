@@ -1,6 +1,6 @@
-import express, {Request, Response} from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import bodyParser from 'body-parser';
-import {DataSource} from "typeorm";
+import {DataSource, ObjectLiteral} from "typeorm";
 import {ProductItem} from "./entities/ProductItem";
 import {Category} from "./entities/Category";
 import {Order} from './entities/Order';
@@ -10,6 +10,9 @@ import {User} from "./entities/User"
 import "reflect-metadata";
 import axios from "axios";
 import {Opinion} from "./entities/Opinion";
+import {Account} from "./entities/Account";
+import jwt from "jsonwebtoken";
+import * as dotenv from "dotenv";
 
 
 const AppDataSource = new DataSource({
@@ -22,7 +25,7 @@ const AppDataSource = new DataSource({
     synchronize: true,
     logging: true,
     // entities: ['./entities/*.{js,ts}'],
-    entities: [Category, ProductItem, Order, Product, OrderStatus, User, Opinion],
+    entities: [Category, ProductItem, Order, Product, OrderStatus, User, Opinion, Account],
 
 });
 
@@ -50,49 +53,49 @@ async function startServer() {
     }
 }
 
-async function addProductAndOrder() {
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(5000);
-
-    const categoryRepository = AppDataSource.getRepository(Category);
-    const productRepository = AppDataSource.getRepository(Product);
-    const orderRepository = AppDataSource.getRepository(Order);
-    const statusRepository = AppDataSource.getRepository(OrderStatus);
-    const userRepository = AppDataSource.getRepository(User);
-
-    const category = new Category("Electronics");
-    await categoryRepository.save(category);
-
-    const product = new Product("Smartphone", "High-end smartphone", 999.99, 0.5, category);
-
-    // await productRepository.save(product);
-    // console.log("Product saved:", product);
-
-    // Create or find status
-    const status = new OrderStatus("Executed");
-    await statusRepository.save(status);
-
-    // Get a product
-    const product2 = await productRepository.findOne({
-        // @ts-ignore
-        where: {_id: 1},
-    });
-
-    // Create an user
-    const user = new User("John Doe", "john@example.com", "123456789")
-    await userRepository.save(user);
-
-    // Create an order
-    const order = new Order(status, user, new Date());
-
-    // Create product item
-    const productItem = new ProductItem(product2!, 2, order);
-
-    order.productList = [productItem];
-
-    await orderRepository.save(order);
-    console.log("Order saved:", order);
-}
+// async function addProductAndOrder() {
+//     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+//     await sleep(5000);
+//
+//     const categoryRepository = AppDataSource.getRepository(Category);
+//     const productRepository = AppDataSource.getRepository(Product);
+//     const orderRepository = AppDataSource.getRepository(Order);
+//     const statusRepository = AppDataSource.getRepository(OrderStatus);
+//     const userRepository = AppDataSource.getRepository(User);
+//
+//     const category = new Category("Electronics");
+//     await categoryRepository.save(category);
+//
+//     const product = new Product("Smartphone", "High-end smartphone", 999.99, 0.5, category);
+//
+//     // await productRepository.save(product);
+//     // console.log("Product saved:", product);
+//
+//     // Create or find status
+//     const status = new OrderStatus("Executed");
+//     await statusRepository.save(status);
+//
+//     // Get a product
+//     const product2 = await productRepository.findOne({
+//         // @ts-ignore
+//         where: {_id: 1},
+//     });
+//
+//     // Create an user
+//     // const user = new User("John Bbby", "john@example.com", "123456789")
+//     // await userRepository.save(user);
+//
+//     // Create an order
+//     const order = new Order(status, user, new Date());
+//
+//     // Create product item
+//     const productItem = new ProductItem(product2!, 2, order);
+//
+//     order.productList = [productItem];
+//
+//     await orderRepository.save(order);
+//     console.log("Order saved:", order);
+// }
 
 //Pobierz produkty
 app.get('/products', async (req: Request, res: Response) => {
@@ -591,11 +594,111 @@ app.get('/products/:id/seo-description', async (req: Request, res: Response) => 
     }
 });
 
+//D2
+// Uwierzytelnianie do aplikacji
+
+async function createAccounts() {
+    const accountRepository = AppDataSource.getRepository(Account);
+    const userRepository = AppDataSource.getRepository(User);
+
+// Tworzymy konto "CLIENT"
+    const clientAccount = new Account("clientUser", "password123", "CLIENT");
+    await clientAccount.hashPassword();
+    await accountRepository.save(clientAccount);
+
+// Tworzymy użytkownika przypisanego do konta "CLIENT"
+    const clientUser = new User("John Bbby", "john@example.com", "123456789", clientAccount);
+    await userRepository.save(clientUser);
+
+// Haszujemy hasło konta
+
+
+// Zapisujemy dane w bazie danych
+
+
+
+}
+
+
+// @ts-ignore
+app.post('/login', async (req: Request, res: Response) => {
+    const { username, password } = req.body;
+
+    try {
+        const accountRepository = AppDataSource.getRepository(Account);
+
+        // @ts-ignore
+        const account = await accountRepository.findOne({ where: { username } });
+
+        if (!account || !(await account.validatePassword(password))) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        const token = jwt.sign(
+            { id: account._id, username: account._username, accountType: account._accountType },
+            process.env.JWT_SECRET!,
+            { expiresIn: process.env.JWT_EXPIRATION }
+        );
+
+        res.status(200).json({ token });
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+export const authenticateJWT = (allowedRoles?: string[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        try {
+            // Weryfikacja tokenu
+            const decoded  = jwt.verify(token, process.env.JWT_SECRET!);
+            const accountId = (<any>decoded)._id;
+
+            // Pobieramy użytkownika z bazy danych, ładując jego konto
+            const userRepository = AppDataSource.getRepository(User);
+
+            const user = await userRepository.findOne({
+                // @ts-ignore
+                where: { _id: accountId },
+                relations: ['_user'],
+            });
+
+            if (!user) {
+                return res.status(404).json({ error: "Account not found" });
+            }
+
+            // Jeśli sprawdzamy rolę, sprawdzamy, czy użytkownik ma odpowiednią rolę
+            if (allowedRoles && !allowedRoles.includes(user.account._accountType)) {
+                return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+            }
+            res.locals = accountId;
+
+            // Jeśli wszystko jest w porządku, przechodzimy do następnego middleware lub endpointu
+            next();
+        } catch (error) {
+            console.error(error);
+            return res.status(403).json({ error: "Invalid or expired token" });
+        }
+    };
+};
+
+//nie testowalem!
+
+
 
 //D3
 //Inicjalizacja towarów w bazie danych na podstawie pliku.
 // @ts-ignore
-app.post("/init", async (req: Request, res: Response) => {
+app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
     try {
         const productData = req.body; // Zawiera listę produktów (dane JSON)
 
@@ -650,7 +753,7 @@ app.post("/init", async (req: Request, res: Response) => {
 // Dodawanie opinii po zakupie
 
 // @ts-ignore
-app.post('/orders/:id/opinions', async (req: Request, res: Response) => {
+app.post('/orders/:id/opinions',authenticateJWT(["CLIENT"]), async (req: Request, res: Response) => {
     // const { id } = req.params;
     const {rating, content} = req.body;
 
@@ -672,7 +775,6 @@ app.post('/orders/:id/opinions', async (req: Request, res: Response) => {
             where: {_id: parseInt(req.params.id)},
             relations: ["_user", "_opinions"],
 
-
         });
 
         if (!order) {
@@ -684,9 +786,11 @@ app.post('/orders/:id/opinions', async (req: Request, res: Response) => {
             return res.status(400).json({error: "Cannot add opinion to an order that is not completed or cancelled"});
         }
 
-        // if (req.user.id !== order.user.id) {
-        //     return res.status(403).json({ error: "You can only add opinions to your own orders" });
-        // }
+        //moga byc problemy tutaj
+        // @ts-ignore
+        if (res.locals !== order.user.account._id) {
+            return res.status(403).json({ error: "You can only add opinions to your own orders" });
+        }
 
 
         const newOpinion = new Opinion(rating, content, order);
@@ -700,5 +804,7 @@ app.post('/orders/:id/opinions', async (req: Request, res: Response) => {
     }
 });
 
+dotenv.config();
 startServer();
+createAccounts();
 // addProductAndOrder();

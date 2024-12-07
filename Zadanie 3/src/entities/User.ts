@@ -1,4 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne, ManyToOne} from "typeorm";
+import {Account} from "./Account";
+import {Order} from "./Order";
 
 
 @Entity("Users")
@@ -15,10 +17,24 @@ export class User {
     @Column("varchar")
     private _phone: string;
 
-    constructor(userName: string, email: string, phone: string) {
+
+    @ManyToOne(() => Account, (account) => account.users, { onDelete: "CASCADE" })
+    @JoinColumn({ name: 'account_id' })
+    _account: Account;
+
+    constructor(userName: string, email: string, phone: string, account : Account) {
         this._userName = userName;
         this._email = email;
         this._phone = phone;
+        this._account = account;
+    }
+
+    get account(): Account {
+        return this._account;
+    }
+
+    set account(value: Account) {
+        this._account = value;
     }
 
     get userName(): string {
