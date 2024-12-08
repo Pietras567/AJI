@@ -3,6 +3,7 @@ import {Product} from "./Product";
 
 
 @Entity("Categories")
+
 export class Category {
     @PrimaryGeneratedColumn()
     private _id!: number;

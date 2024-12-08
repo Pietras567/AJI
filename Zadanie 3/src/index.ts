@@ -56,49 +56,6 @@ async function startServer() {
     }
 }
 
-// async function addProductAndOrder() {
-//     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-//     await sleep(5000);
-//
-//     const categoryRepository = AppDataSource.getRepository(Category);
-//     const productRepository = AppDataSource.getRepository(Product);
-//     const orderRepository = AppDataSource.getRepository(Order);
-//     const statusRepository = AppDataSource.getRepository(OrderStatus);
-//     const userRepository = AppDataSource.getRepository(User);
-//
-//     const category = new Category("Electronics");
-//     await categoryRepository.save(category);
-//
-//     const product = new Product("Smartphone", "High-end smartphone", 999.99, 0.5, category);
-//
-//     // await productRepository.save(product);
-//     // console.log("Product saved:", product);
-//
-//     // Create or find status
-//     const status = new OrderStatus("Executed");
-//     await statusRepository.save(status);
-//
-//     // Get a product
-//     const product2 = await productRepository.findOne({
-//         // @ts-ignore
-//         where: {_id: 1},
-//     });
-//
-//     // Create an user
-//     // const user = new User("John Bbby", "john@example.com", "123456789")
-//     // await userRepository.save(user);
-//
-//     // Create an order
-//     const order = new Order(status, user, new Date());
-//
-//     // Create product item
-//     const productItem = new ProductItem(product2!, 2, order);
-//
-//     order.productList = [productItem];
-//
-//     await orderRepository.save(order);
-//     console.log("Order saved:", order);
-// }
 
 //Pobierz produkty
 app.get('/products', async (req: Request, res: Response) => {
@@ -493,7 +450,6 @@ app.get('/status', async (req: Request, res: Response) => {
     }
 });
 
-// GET app_url/products/{id}/seo-description
 //D1
 //Optymalizacja opisu produktu pod kątem SEO
 
@@ -534,7 +490,7 @@ Always respond in English.
             },
             {
                 role: 'user',
-                content: `Product Name: ${productData.name}, Description: ${productData.description}, Price: $${productData.price}, Weight: ${productData.weight}kg, Category: ${productData.category}.`
+                content: `Product Name: ${productData.name}, Description: ${productData.description}, Price: ${productData.price}, Weight: ${productData.weight}kg, Category: ${productData.category}.`
             }
         ]
     };
@@ -627,7 +583,8 @@ async function createAccounts() {
     const user123 = await userRepository.findOne({
         // @ts-ignore
         where: {_id: 4},
-    }) as User; ;
+    }) as User;
+    ;
 
     const status123 = await statusRepository.findOne({
         // @ts-ignore
@@ -721,15 +678,15 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
                 id: number;
                 username: string;
                 accountType: string;
-                iat?: number; // Opcjonalne: czas wystawienia tokena (issued at)
-                exp?: number; // Opcjonalne: czas wygaśnięcia tokena (expiration)
+                iat?: number;
+                exp?: number;
             };
 
             const payload = decoded as JwtPayload;
 
             const accountId = payload.id;
 
-            // Pobieramy użytkownika z bazy danych, ładując jego konto
+
             // const userRepository = AppDataSource.getRepository(User);
             const accountRepository = AppDataSource.getRepository(Account);
 
@@ -750,9 +707,7 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
                     return res.status(403).json({error: "Forbidden: Insufficient permissions"});
                 }
             }
-            console.log("++++++++++++++++++++++++++++++++++++++++++++++: " + accountId);
             res.locals.accountId = accountId;
-            console.log("==============================================: " + res.locals.accountId);
             next();
         } catch (error) {
             console.error(error);
@@ -760,8 +715,6 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
         }
     };
 };
-
-//nie testowalem!
 
 
 //D3
@@ -858,8 +811,6 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
             return res.status(404).json({error: "Order not found"});
         }
 
-        // console.log("------------------------------------------------------------ : " + JSON.stringify(userFromOrder, null, 2));
-        // console.log("------------------------------------------------------------ : " + JSON.stringify(userFromOrder._account, null, 2));
         // @ts-ignore
         console.log("Order: " + JSON.stringify(order, null, 2))
 
@@ -893,21 +844,25 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
 
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Unauthorized: No token provided" });
+        return res.status(401).json({error: "Unauthorized: No token provided"});
     }
 
     const token = authHeader.split(" ")[1];
 
     try {
         // Weryfikacja tokenu
-        // const decoded = jwt.verify(token, process.env.JWT_SECRET!, { ignoreExpiration: false }) as {
+
+        // jwt.verify(token, process.env.JWT_SECRET!, { ignoreExpiration: true });
+        // jwt.verify(token, secretKey, { ignoreExpiration: true });
+
+
         const decoded = jwt.decode(token) as { id: number; username: string; accountType: string; exp: number };
         // Pobranie użytkownika z bazy danych
         const accountRepository = AppDataSource.getRepository(Account);
-        const account = await accountRepository.findOne({ where: { _id: decoded.id } });
+        const account = await accountRepository.findOne({where: {_id: decoded.id}});
 
         if (!account) {
-            return res.status(404).json({ error: "Account not found" });
+            return res.status(404).json({error: "Account not found"});
         }
 
         // Sprawdzenie czasu ważności tokenu
@@ -916,7 +871,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
 
         if (timeLeft > 30 * 60) {
             // Jeśli do wygaśnięcia zostało więcej niż 30 minut, odrzuć żądanie
-            return res.status(400).json({ message: "Token is not close to expiring" });
+            return res.status(400).json({message: "Token is not close to expiring"});
         }
 
         // Generowanie nowego tokenu
@@ -926,22 +881,91 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
         //     { expiresIn: process.env.JWT_EXPIRATION }
         // );
         const newToken = jwt.sign(
-            { id: account._id, username: account._username, accountType: account._accountType },
+            {id: account._id, username: account._username, accountType: account._accountType},
             secretKey!,
-            { expiresIn: expireTime }
+            {expiresIn: expireTime}
         );
 
-        return res.status(200).json({ token: newToken });
+        return res.status(200).json({token: newToken});
     } catch (error) {
         console.error("Token refresh error:", error);
-        return res.status(403).json({ error: "Invalid or expired token" });
+        return res.status(403).json({error: "Invalid or expired token"});
     }
 });
 
+async function initializeOrderStatuses() {
+
+    const statuses = [
+        "NotApproved",
+        "Approved",
+        "Cancelled",
+        "Executed",
+    ];
+
+    for (const name of statuses) {
+        await addOrderStatus(name);
+    }
+    console.log("Order statuses initialized successfully.");
+}
+
+async function addOrderStatus(name: string,) {
+    const orderStatusRepository = AppDataSource.getRepository(OrderStatus);
+
+    // @ts-ignore
+    const existingStatus = await orderStatusRepository.findOneBy({_currentStatus: name});
+
+    if (!existingStatus) {
+        const newStatus = new OrderStatus(name);
+        await orderStatusRepository.save(newStatus);
+        console.log(`Status '${name}' added.`);
+    } else {
+        console.log(`Status '${name}' already exists.`);
+    }
+}
 
 
-startServer();
-// createAccounts();
+async function initializeCategories() {
+    const categories = [
+        "Electronics",
+        "Clothing",
+        "Books",
+        "Toys",
+    ];
+
+    for (const name of categories) {
+        await addCategory(name);
+    }
+
+    console.log("Categories initialized successfully.");
+}
+
+async function addCategory(name: string,) {
+    const categoryRepository = AppDataSource.getRepository(Category);
+
+    // @ts-ignore
+    const existingCategory = await categoryRepository.findOneBy({_name: name});
+
+    if (!existingCategory) {
+        const newCategory = new Category(name);
+        await categoryRepository.save(newCategory);
+        console.log(`Category '${name}' added.`);
+    } else {
+        console.log(`Category '${name}' already exists.`);
+    }
+}
 
 
-//addProductAndOrder();
+// startServer();
+// // createAccounts();
+// initializeOrderStatuses();
+// initializeCategories();
+// //addProductAndOrder();
+startServer()
+    .then(() => initializeOrderStatuses())
+    .then(() => initializeCategories())
+    .then(() => {
+        console.log("Server started.");
+    })
+    .catch((error) => {
+        console.error("Error occured:", error);
+    });

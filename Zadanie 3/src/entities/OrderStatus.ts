@@ -4,6 +4,7 @@ import {Order} from "./Order";
 
 
 @Entity("OrderStatuses")
+
 export class OrderStatus {
     @PrimaryGeneratedColumn()
     private _id!: number;
