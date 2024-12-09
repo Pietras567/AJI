@@ -10,7 +10,7 @@ export class Order {
   @PrimaryGeneratedColumn()
   private _id!: number;
 
-  @Column("timestamp", { nullable: true })
+  @Column("timestamp")
   private _orderDate?: Date;
 
   @ManyToOne(() => OrderStatus, { eager: true })

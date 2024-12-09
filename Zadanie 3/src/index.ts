@@ -85,8 +85,74 @@ app.get('/products/:id', async (req: Request, res: Response) => {
     }
 })
 
+
+export const authenticateJWT = (allowedRoles?: string[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({error: "Unauthorized"});
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        try {
+
+            const secretKey = "213742069"
+            const expireTime = "1h"
+
+            // Weryfikacja tokenu
+            // const decoded  = jwt.verify(token, process.env.JWT_SECRET!);
+            const decoded = jwt.verify(token, secretKey);
+
+            console.log("Payload:", decoded);
+
+            type JwtPayload = {
+                id: number;
+                username: string;
+                accountType: string;
+                iat?: number;
+                exp?: number;
+            };
+
+            const payload = decoded as JwtPayload;
+
+            const accountId = payload.id;
+
+
+            // const userRepository = AppDataSource.getRepository(User);
+            const accountRepository = AppDataSource.getRepository(Account);
+
+            const account = await accountRepository.findOne({
+                // @ts-ignore
+                where: {_id: accountId},
+                // relations: ['_user'],
+            });
+
+            if (!account) {
+                return res.status(404).json({error: "Account not found"});
+            }
+
+
+            if (allowedRoles != null) {
+                // Jeśli sprawdzamy rolę, sprawdzamy, czy użytkownik ma odpowiednią rolę
+                if (allowedRoles && !allowedRoles.includes(account._accountType)) {
+                    return res.status(403).json({error: "Forbidden: Insufficient permissions"});
+                }
+            }
+            res.locals.accountId = accountId;
+            next();
+        } catch (error) {
+            console.error(error);
+            return res.status(403).json({error: "Invalid or expired token"});
+        }
+    };
+};
+
+
 //Dodaj produkt
-app.post('/products', async (req: Request, res: Response) => {
+// @ts-ignore
+app.post('/products', authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
     try {
         const {_name, _description, _price, _weight, categoryId} = req.body;
 
@@ -127,7 +193,8 @@ app.post('/products', async (req: Request, res: Response) => {
 })
 
 //Aktualizuj product
-app.put('/products/:id', async (req: Request, res: Response) => {
+// @ts-ignore
+app.put('/products/:id', authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
     try {
         const {_name, _description, _price, _weight, categoryId} = req.body;
 
@@ -219,7 +286,8 @@ app.get('/orders', async (req: Request, res: Response) => {
 });
 
 
-app.post('/users', async (req: Request, res: Response) => {
+// @ts-ignore
+app.post('/users', authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
     try {
         //Pobranie i sprawdzenie danych wejściowych
         const {userName, email, phone} = req.body;
@@ -245,7 +313,8 @@ app.post('/users', async (req: Request, res: Response) => {
 
 
 //Dodaj zamówienie
-app.post('/orders', async (req: Request, res: Response) => {
+// @ts-ignore
+app.post('/orders', authenticateJWT(), async (req: Request, res: Response) => {
     try {
         const {statusId, userId, orderDate, products} = req.body;
 
@@ -342,7 +411,8 @@ app.post('/orders', async (req: Request, res: Response) => {
 
 
 //Edytuj zamówienie
-app.patch('/orders/:id', async (req: Request, res: Response) => {
+// @ts-ignore
+app.patch('/orders/:id', authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
     try {
         const {statusId} = req.body;
         const orderRepository = AppDataSource.getRepository(Order);
@@ -565,45 +635,45 @@ async function createAccounts() {
     const orderRepository = AppDataSource.getRepository(Order);
     const productRepository = AppDataSource.getRepository(Product);
     const statusRepository = AppDataSource.getRepository(OrderStatus);
-// // Tworzymy konto "CLIENT"
-//     const clientAccount = new Account("sigmaAccount", "haselko123", "CLIENT");
-//     await clientAccount.hashPassword();
-//     await accountRepository.save(clientAccount);
+// Tworzymy konto "CLIENT"
+    const clientAccount = new Account("sigmaManager", "haselko321", "MANAGER");
+    await clientAccount.hashPassword();
+    await accountRepository.save(clientAccount);
 //
 // // Tworzymy użytkownika przypisanego do konta "CLIENT"
 //     const clientUser = new User("mala sigiemka", "sigma@example.pl", "123456789", clientAccount);
 //     await userRepository.save(clientUser);
 
     // Get a product
-    const product2 = await productRepository.findOne({
-        // @ts-ignore
-        where: {_id: 1},
-    });
+    // const product2 = await productRepository.findOne({
+    //     // @ts-ignore
+    //     where: {_id: 1},
+    // });
 
-    const user123 = await userRepository.findOne({
-        // @ts-ignore
-        where: {_id: 4},
-    }) as User;
-    ;
-
-    const status123 = await statusRepository.findOne({
-        // @ts-ignore
-        where: {_id: 2},
-    }) as OrderStatus;
-
-// Create an order
-
-
-    const order = new Order(status123, user123, new Date());
-
-    // Create product item
-    const productItem = new ProductItem(product2!, 2, order);
-
-    order.productList = [productItem];
-
-    await orderRepository.save(order);
-    console.log("Order saved:", order);
-
+//     const user123 = await userRepository.findOne({
+//         // @ts-ignore
+//         where: {_id: 4},
+//     }) as User;
+//     ;
+//
+//     const status123 = await statusRepository.findOne({
+//         // @ts-ignore
+//         where: {_id: 2},
+//     }) as OrderStatus;
+//
+// // Create an order
+//
+//
+//     const order = new Order(status123, user123, new Date());
+//
+//     // Create product item
+//     const productItem = new ProductItem(product2!, 2, order);
+//
+//     order.productList = [productItem];
+//
+//     await orderRepository.save(order);
+//     console.log("Order saved:", order);
+//
 
 }
 
@@ -651,70 +721,6 @@ app.post('/login', async (req: Request, res: Response) => {
         res.status(500).send("Internal Server Error");
     }
 });
-
-
-export const authenticateJWT = (allowedRoles?: string[]) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        const authHeader = req.headers.authorization;
-
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({error: "Unauthorized"});
-        }
-
-        const token = authHeader.split(" ")[1];
-
-        try {
-
-            const secretKey = "213742069"
-            const expireTime = "1h"
-
-            // Weryfikacja tokenu
-            // const decoded  = jwt.verify(token, process.env.JWT_SECRET!);
-            const decoded = jwt.verify(token, secretKey);
-
-            console.log("Payload:", decoded);
-
-            type JwtPayload = {
-                id: number;
-                username: string;
-                accountType: string;
-                iat?: number;
-                exp?: number;
-            };
-
-            const payload = decoded as JwtPayload;
-
-            const accountId = payload.id;
-
-
-            // const userRepository = AppDataSource.getRepository(User);
-            const accountRepository = AppDataSource.getRepository(Account);
-
-            const account = await accountRepository.findOne({
-                // @ts-ignore
-                where: {_id: accountId},
-                // relations: ['_user'],
-            });
-
-            if (!account) {
-                return res.status(404).json({error: "Account not found"});
-            }
-
-
-            if (allowedRoles != null) {
-                // Jeśli sprawdzamy rolę, sprawdzamy, czy użytkownik ma odpowiednią rolę
-                if (allowedRoles && !allowedRoles.includes(account._accountType)) {
-                    return res.status(403).json({error: "Forbidden: Insufficient permissions"});
-                }
-            }
-            res.locals.accountId = accountId;
-            next();
-        } catch (error) {
-            console.error(error);
-            return res.status(403).json({error: "Invalid or expired token"});
-        }
-    };
-};
 
 
 //D3
@@ -850,7 +856,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
     const token = authHeader.split(" ")[1];
 
     try {
-        // Weryfikacja tokenu
+
 
         // jwt.verify(token, process.env.JWT_SECRET!, { ignoreExpiration: true });
         // jwt.verify(token, secretKey, { ignoreExpiration: true });
@@ -874,7 +880,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
             return res.status(400).json({message: "Token is not close to expiring"});
         }
 
-        // Generowanie nowego tokenu
+
         // const newToken = jwt.sign(
         //     { id: account._id, username: account._username, accountType: account._accountType },
         //     process.env.JWT_SECRET!,
@@ -955,17 +961,14 @@ async function addCategory(name: string,) {
 }
 
 
-// startServer();
-// // createAccounts();
-// initializeOrderStatuses();
-// initializeCategories();
-// //addProductAndOrder();
 startServer()
     .then(() => initializeOrderStatuses())
     .then(() => initializeCategories())
+    // .then(() => createAccounts())
     .then(() => {
         console.log("Server started.");
     })
     .catch((error) => {
         console.error("Error occured:", error);
     });
+
