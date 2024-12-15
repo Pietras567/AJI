@@ -34,6 +34,8 @@ const AppDataSource = new DataSource({
 
 
 const app = express();
+const cors = require('cors');
+app.use(cors());
 app.use(bodyParser.json());
 
 let products: Product[] = [];
