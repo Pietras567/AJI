@@ -15,6 +15,7 @@ export default {
     <nav>
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/cart">Cart</RouterLink>
+      <RouterLink to="/authentication">Log in</RouterLink>
     </nav>
   </div>
   <RouterView />

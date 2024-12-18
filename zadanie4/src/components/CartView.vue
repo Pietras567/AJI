@@ -25,6 +25,8 @@ export default {
   <h1>Chart View</h1>
 </template>
 
-<style scoped>
-
+<style>
+body {
+  background-color: #f8f9fa;
+}
 </style>
