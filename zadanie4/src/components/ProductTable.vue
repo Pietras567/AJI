@@ -44,6 +44,11 @@ export default {
           <td>{{product._price}} PLN</td>
           <td>{{product._weight}} kg</td>
           <td>{{product._category._name}}</td>
+          <td>
+            <router-link :to="{ name: 'cart' }">
+              <button>Add to cart</button>
+            </router-link>
+          </td>
         </tr>
       </tbody>
     </table>
