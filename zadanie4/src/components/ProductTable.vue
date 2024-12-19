@@ -107,36 +107,42 @@ export default {
 </script>
 
 <template>
-  <div class="container">
-    <h1 class="my-4">Product list</h1>
+  <div class="container mt-5">
+    <h1 class="my-4 text-center">Product list</h1>
 
     <!-- Filtering Controls -->
-    <div class="filtering-controls mb-3">
-      <label for="filter-name">Filter by Name:</label>
-      <input id="filter-name" type="text" v-model="filterName" placeholder="Enter product name" />
-
-      <label for="filter-category">Filter by Category:</label>
-      <select id="filter-category" v-model="filterCategory">
-        <option value="">All Categories</option>
-        <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
-      </select>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="filter-name" class="form-label">Filter by Name:</label>
+        <input id="filter-name" type="text" class="form-control" v-model="filterName" placeholder="Enter product name" />
+      </div>
+      <div class="col-md-6">
+        <label for="filter-category" class="form-label">Filter by Category:</label>
+        <select id="filter-category" class="form-select" v-model="filterCategory">
+          <option value="">All Categories</option>
+          <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+        </select>
+      </div>
     </div>
 
     <!-- Sorting Controls -->
-    <div class="sorting-controls mb-3">
-      <label for="sort-by">Sort by:</label>
-      <select id="sort-by" v-model="sortBy">
-        <option value="_name">Name</option>
-        <option value="_description">Description</option>
-        <option value="_price">Price</option>
-        <option value="_weight">Weight</option>
-      </select>
-
-      <label for="sort-order">Order:</label>
-      <select id="sort-order" v-model="sortOrder">
-        <option value="asc">Ascending</option>
-        <option value="desc">Descending</option>
-      </select>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="sort-by" class="form-label">Sort by:</label>
+        <select id="sort-by" class="form-select" v-model="sortBy">
+          <option value="_name">Name</option>
+          <option value="_description">Description</option>
+          <option value="_price">Price</option>
+          <option value="_weight">Weight</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="sort-order" class="form-label">Order:</label>
+        <select id="sort-order" class="form-select" v-model="sortOrder">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
     </div>
 
     <table class="table table-striped">
@@ -158,19 +164,26 @@ export default {
           <td>{{product._weight}} kg</td>
           <td>{{product._category._name}}</td>
           <td>
-            <button @click="openPopup(product._id)">Add to cart</button>
+            <button class="btn btn-primary" @click="openPopup(product._id)">Add to cart</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div v-if="showPopup" class="popup-overlay">
-      <div class="popup">
-        <h3>Select Quantity</h3>
-        <input type="number" v-model="quantity" min="1" />
-        <div class="popup-actions">
-          <button @click="addToCart">Confirm</button>
-          <button @click="closePopup">Cancel</button>
+    <div v-if="showPopup" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">Select Quantity</h3>
+            <button type="button" class="btn-close" @click="closePopup"></button>
+          </div>
+          <div class="modal-body">
+            <input type="number" class="form-control" v-model="quantity" min="1" />
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success" @click="addToCart">Confirm</button>
+            <button class="btn btn-secondary" @click="closePopup">Cancel</button>
+          </div>
         </div>
       </div>
     </div>
@@ -180,42 +193,5 @@ export default {
 <style>
 body {
   background-color: #f8f9fa;
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.popup {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.popup-actions button {
-  margin: 5px;
-}
-
-.sorting-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filtering-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
 }
 </style>
