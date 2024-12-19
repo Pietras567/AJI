@@ -9,7 +9,11 @@ export default {
       selectedProductId: null,
       quantity: 1,
       sortBy: null,
-      sortOrder: 'asc'
+      sortOrder: 'asc',
+      categories: [],
+      filterCategory: '',
+      filterName: '',
+      filteredProducts: [],
     };
   },
   created() {
@@ -20,14 +24,16 @@ export default {
       try {
         const response = await axios.get('http://localhost:3000/products');
         this.products = response.data;
+
+        this.filteredProducts = this.products;
+
+        const response2 = await axios.get('http://localhost:3000/categories');
+        response2.data.forEach((element) => this.categories.push(element._name));
       } catch (error) {
         console.error('Error fetching products: ', error);
       }
     },
     addToCart() {
-      //console.log(text);
-      //console.log(quantity);
-
       if (this.quantity <= 0) {
         alert('Quantity must be greater than 0');
         return;
@@ -71,15 +77,30 @@ export default {
           }
         });
       }
-    }},
-    watch: {
-      sortBy() {
-        this.sortProducts();
-      },
-      sortOrder() {
-        this.sortProducts();
-      }
+    },
+    filterProducts() {
+      this.filteredProducts = this.products.filter(product => {
+        const matchesName = product._name.toLowerCase().includes(this.filterName.toLowerCase());
+        const matchesCategory = this.filterCategory ? product._category._name === this.filterCategory : true;
+        return matchesName && matchesCategory;
+      });
+      this.sortProducts();
     }
+  },
+  watch: {
+    sortBy() {
+      this.sortProducts();
+    },
+    sortOrder() {
+      this.sortProducts();
+    },
+    filterName() {
+      this.filterProducts();
+    },
+    filterCategory() {
+      this.filterProducts();
+    }
+  }
 
 };
 
@@ -89,6 +110,19 @@ export default {
   <div class="container">
     <h1 class="my-4">Product list</h1>
 
+    <!-- Filtering Controls -->
+    <div class="filtering-controls mb-3">
+      <label for="filter-name">Filter by Name:</label>
+      <input id="filter-name" type="text" v-model="filterName" placeholder="Enter product name" />
+
+      <label for="filter-category">Filter by Category:</label>
+      <select id="filter-category" v-model="filterCategory">
+        <option value="">All Categories</option>
+        <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+      </select>
+    </div>
+
+    <!-- Sorting Controls -->
     <div class="sorting-controls mb-3">
       <label for="sort-by">Sort by:</label>
       <select id="sort-by" v-model="sortBy">
@@ -117,7 +151,7 @@ export default {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in products" :key="product._id">
+        <tr v-for="product in filteredProducts" :key="product._id">
           <td>{{product._name}}</td>
           <td>{{product._description}}</td>
           <td>{{product._price}} PLN</td>
@@ -176,5 +210,12 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.filtering-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 </style>
