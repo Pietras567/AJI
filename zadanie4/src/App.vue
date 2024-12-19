@@ -33,13 +33,19 @@ export default {
             <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                  <RouterLink class="nav-link" to="/">Home</RouterLink>
+                  <RouterLink class="nav-link" to="/">
+                    <img src="@/assets/home.png" alt="Home" height="45"/>
+                  </RouterLink>
                 </li>
                 <li class="nav-item">
-                  <RouterLink class="nav-link" to="/cart">Cart</RouterLink>
+                  <RouterLink class="nav-link" to="/cart">
+                    <img src="@/assets/cart.png" alt="Cart" height="45"/>
+                  </RouterLink>
                 </li>
                 <li class="nav-item">
-                  <RouterLink class="nav-link" to="/authentication">Log in</RouterLink>
+                  <RouterLink class="nav-link" to="/authentication">
+                    <img src="@/assets/login.png" alt="Log in" height="45"/>
+                  </RouterLink>
                 </li>
               </ul>
             </div>
