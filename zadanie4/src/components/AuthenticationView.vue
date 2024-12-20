@@ -5,7 +5,7 @@
         <h5 class="card-title mb-0">{{ isRegister ? stateObj.register.name : stateObj.login.name }} Form</h5>
       </div>
       <div class="card-body">
-        <form @submit.prevent="isRegister ? register() : login()">
+        <form ref="form" @submit.prevent="isRegister ? register() : login()">
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input
@@ -88,6 +88,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "Authentication",
   data() {
@@ -98,6 +100,7 @@ export default {
       emailError: "",
       username: "",
       password: "",
+      phoneNumber: "",
       confirmPassword: "",
       isRegister: false,
       errorMessage: "",
@@ -117,11 +120,19 @@ export default {
     togglePassword() {
       this.showPassword = !this.showPassword;
     },
-    login() {
+    async login() {
       const { username } = this;
       console.log(`${username} logged in`);
+
+      let data = {'username': this.username, 'password': this.password};
+      console.log(data)
+      const response = await axios.post('http://localhost:3000/login', data);
+      let userData = response.data;
+
+      localStorage.setItem('accountId', JSON.stringify(userData.accountId));
+      localStorage.setItem('accountToken', JSON.stringify(userData.accountToken));
     },
-    register() {
+    async register() {
       if (!this.validatePhoneNumber(this.phoneNumber)) {
         this.phoneNumberError = "Invalid phone number format.";
         return;
@@ -134,8 +145,17 @@ export default {
         //this.emailError = "Invalid email address";
       }
       if (this.password === this.confirmPassword) {
-        this.isRegister = false;
         this.errorMessage = "";
+
+        let data = {'username': this.username, 'password': this.password, 'email': this.email, 'phone': this.phoneNumber.replace(/\s+/g, '')};
+        const response = await axios.post('http://localhost:3000/register', data);
+        let userData = response.data;
+
+        if (response.status !== 200) {
+          this.errorMessage = userData.message;
+        }
+
+        this.isRegister = false;
         this.$refs.form.reset();
       } else {
         this.errorMessage = "Passwords do not match";
@@ -146,7 +166,7 @@ export default {
       return emailRegex.test(email);
     },
     validatePhoneNumber(phoneNumber) {
-      const phoneRegex = /^(\+\d{1,3})\s(\d{1,14})$/;
+      const phoneRegex = /^(\d{3}\s?){3}$/;
       return phoneRegex.test(phoneNumber);
     }
   },

@@ -717,7 +717,55 @@ app.post('/login', async (req: Request, res: Response) => {
         );
 
 
-        res.status(200).json({token});
+        res.status(200).json({'accountToken': token, 'accountId': account._id});
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+app.post('/register', async(req: Request, res: Response) => {
+    const {username, password, email, phone} = req.body;
+
+    try {
+        const accountRepository = AppDataSource.getRepository(Account);
+        const userRepository = AppDataSource.getRepository(User);
+
+        const account = await accountRepository.findOne({where: {_username: username}});
+        if(account) {
+            res.status(409).send("User with this name arleady exists");
+            return;
+        }
+
+        // @ts-ignore
+        const user = await userRepository.findOne({where: {_userName: username}});
+        if(user) {
+            res.status(409).send("User with this name arleady exists");
+            return;
+        }
+
+        // @ts-ignore
+        const user2 = await userRepository.findOne({where: {_email: email}});
+        if(user2) {
+            res.status(409).send("The email has already been used");
+            return;
+        }
+
+        // @ts-ignore
+        const user3 = await userRepository.findOne({where: {_phone: phone}});
+        if(user3) {
+            res.status(409).send("The phone number has already been used");
+            return;
+        }
+
+        let newAccount: Account = new Account(username, password, "CLIENT");
+        let newUser: User = new User(username,email,phone, newAccount);
+
+        accountRepository.save(newAccount);
+        userRepository.save(newUser);
+
+        res.status(200).send("Account created");
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).send("Internal Server Error");
