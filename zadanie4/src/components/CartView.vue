@@ -24,20 +24,57 @@ export default {
       } catch (error) {
         console.error('Error loading cart: ', error);
       }
+    },
+    async deleteProduct(productId) {
+      console.log("Deleted: " + productId)
+
+      // Usuń produkt z lokalnego koszyka
+      this.cart = this.cart.filter(item => item.id !== productId);
+
+      // Zaktualizuj koszyk w localStorage
+      const updatedCart = this.cart.map(item => ({
+        id: item.id,
+        quantity: item.quantity
+      }));
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+
+      alert('Product deleted from cart successfully!');
+    },
+    async finalizeOrder() {
+
+    },
+    updateQuantity(productId, newQuantity) {
+      console.log(`Updating product ID ${productId} to quantity ${newQuantity}`);
+
+      // Znajdź produkt w koszyku i zaktualizuj ilość oraz cenę
+      const product = this.cart.find(item => item.id === productId);
+      if (product) {
+        product.quantity = newQuantity;
+        product.price = product.product._price * newQuantity;
+      }
+
+      // Zaktualizuj koszyk w localStorage
+      const updatedCart = this.cart.map(item => ({
+        id: item.id,
+        quantity: item.quantity
+      }));
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+
+      console.log('Cart updated in localStorage:', updatedCart);
     }
   }
 };
 </script>
 
 <template>
-  <h1>Chart View</h1>
+  <h1 class="text-center">Cart</h1>
 
   <table class="table table-striped">
     <thead>
     <tr>
       <th>Name</th>
       <th>Price</th>
-      <th>Quantity</th>
+      <th></th>
       <th></th>
     </tr>
     </thead>
@@ -45,14 +82,17 @@ export default {
     <tr v-for="product in this.cart" :key="cart.id">
       <td>{{product.product._name}}</td>
       <td>{{product.price}} PLN</td>
-      <td>{{product.quantity}}</td>
       <td>
         <label for="change-quantity" class="form-label">Change quantity</label>
-        <input id="change-quantity" type="number" class="form-control" v-model="product.quantity" min="1" />
+        <input id="change-quantity" type="number" class="form-control w-50" v-model.number="product.quantity" min="1" @input="updateQuantity(product.id, product.quantity)"/>
+      </td>
+      <td>
+        <img src="@/assets/delete.png" alt="Delete" width="32px" @click="deleteProduct(product.id)" class="align-bottom">
       </td>
     </tr>
     </tbody>
   </table>
+  <button class="btn btn-primary" @click="finalizeOrder">Finalize order</button>
 
 </template>
 
