@@ -760,6 +760,7 @@ app.post('/register', async(req: Request, res: Response) => {
         }
 
         let newAccount: Account = new Account(username, password, "CLIENT");
+        await newAccount.hashPassword();
         let newUser: User = new User(username,email,phone, newAccount);
 
         accountRepository.save(newAccount);
