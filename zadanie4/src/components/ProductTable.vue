@@ -7,6 +7,7 @@ export default {
       products: [],
       showPopup: false,
       selectedProductId: null,
+      expandedProductId: null,
       quantity: 1,
       sortBy: null,
       sortOrder: 'asc',
@@ -85,7 +86,15 @@ export default {
         return matchesName && matchesCategory;
       });
       this.sortProducts();
-    }
+    },
+    toggleDescription(productId) {
+      // Jeśli kliknięto ten sam produkt, zwinie się sekcja, w przeciwnym razie pokaże nową
+      if (this.products.some(product => product._id === productId)) {
+        this.expandedProductId = this.expandedProductId === productId ? null : productId;
+      } else {
+        console.error('Product not found for the given ID:', productId);
+      }
+    },
   },
   watch: {
     sortBy() {
@@ -147,24 +156,33 @@ export default {
 
     <table class="table table-striped">
       <thead>
-        <tr>
+        <tr class="grid-row">
           <th>Name</th>
-          <th>Description</th>
           <th>Price</th>
           <th>Weight</th>
           <th>Category</th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in filteredProducts" :key="product._id">
+        <tr v-for="product in filteredProducts" :key="product._id" class="grid-row">
           <td>{{product._name}}</td>
-          <td>{{product._description}}</td>
           <td>{{product._price}} PLN</td>
           <td>{{product._weight}} kg</td>
           <td>{{product._category._name}}</td>
           <td>
             <button class="btn btn-primary" @click="openPopup(product._id)">Add to cart</button>
+          </td>
+          <td>
+            <button class="btn btn-info" @click="toggleDescription(product._id)">
+              {{ expandedProductId === product._id ? 'Hide Details' : 'Show Details' }}
+            </button>
+          </td>
+
+          <!-- Rozwinięty opis -->
+          <td v-if="expandedProductId === product._id" class="break-line bg-light">
+            <p><strong>Description:</strong> {{ product._description }}</p>
           </td>
         </tr>
       </tbody>
@@ -193,5 +211,14 @@ export default {
 <style>
 body {
   background-color: #f8f9fa;
+}
+
+.grid-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.break-line {
+  grid-column: 1 / -1;
 }
 </style>
