@@ -120,17 +120,29 @@ export default {
     togglePassword() {
       this.showPassword = !this.showPassword;
     },
+
     async login() {
-      const { username } = this;
-      console.log(`${username} logged in`);
+      const {username} = this;
+
 
       let data = {'username': this.username, 'password': this.password};
-      console.log(data)
-      const response = await axios.post('http://localhost:3000/login', data);
-      let userData = response.data;
 
-      localStorage.setItem('accountId', JSON.stringify(userData.accountId));
-      localStorage.setItem('accountToken', JSON.stringify(userData.accountToken));
+      try {
+        const response = await axios.post('http://localhost:3000/login', data,
+            {withCredentials: true,
+            });
+
+        // const token = response.data.token;
+
+
+
+        console.log("Login successful");
+        this.$router.push('/');
+      } catch (error) {
+        console.error("Login failed:", error.response?.data?.error || error.message);
+        this.errorMessage = "Invalid username or password"; // Display the error to the user
+      }
+
     },
     async register() {
       if (!this.validatePhoneNumber(this.phoneNumber)) {
@@ -147,7 +159,12 @@ export default {
       if (this.password === this.confirmPassword) {
         this.errorMessage = "";
 
-        let data = {'username': this.username, 'password': this.password, 'email': this.email, 'phone': this.phoneNumber.replace(/\s+/g, '')};
+        let data = {
+          'username': this.username,
+          'password': this.password,
+          'email': this.email,
+          'phone': this.phoneNumber.replace(/\s+/g, '')
+        };
         const response = await axios.post('http://localhost:3000/register', data);
         let userData = response.data;
 
@@ -174,7 +191,14 @@ export default {
     toggleMessage() {
       return this.isRegister ? this.stateObj.register.message : this.stateObj.login.message;
     }
-  }
+  },
+  created() {
+    axios.defaults.withCredentials = true;
+  },
+
+
+
+
 };
 </script>
 

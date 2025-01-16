@@ -13,6 +13,8 @@ import {Opinion} from "./entities/Opinion";
 import {Account} from "./entities/Account";
 import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import cors from 'cors';
 
 require('dotenv').config({path: './secret.env'});
 dotenv.config();
@@ -34,9 +36,12 @@ const AppDataSource = new DataSource({
 
 
 const app = express();
-const cors = require('cors');
-app.use(cors());
+// @ts-ignore
+
+app.use(cors({origin: 'http://localhost:5173',  // The URL of your frontend application (change this if necessary)
+    credentials: true,}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 let products: Product[] = [];
 let categories: Category[] = [];
@@ -90,13 +95,20 @@ app.get('/products/:id', async (req: Request, res: Response) => {
 
 export const authenticateJWT = (allowedRoles?: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const authHeader = req.headers.authorization;
+        // const authHeader = req.headers.authorization;
+        // const authHeader = req.cookies.authToken;
+        //
+        // if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        //     return res.status(401).json({error: "Unauthorized"});
+        // }
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({error: "Unauthorized"});
+
+        const token = req.cookies.authToken;
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized: No token provided" });
         }
 
-        const token = authHeader.split(" ")[1];
+        // const token = authHeader.split(" ")[1];
 
         try {
 
@@ -689,11 +701,6 @@ app.post('/login', async (req: Request, res: Response) => {
 
 
     try {
-        //const secret = process.env.JWT_SECRET
-        //console.log(secret)
-        //const expire = process.env.JWT_EXPIRATION
-        //console.log(expire)
-        //console.log(process.env)
 
         const accountRepository = AppDataSource.getRepository(Account);
 
@@ -704,11 +711,6 @@ app.post('/login', async (req: Request, res: Response) => {
             return res.status(401).json({error: "Invalid username or password"});
         }
 
-        // const token = jwt.sign(
-        //     { id: account._id, username: account._username, accountType: account._accountType },
-        //     process.env.JWT_SECRET!,
-        //     { expiresIn: process.env.JWT_EXPIRATION }
-        // );
 
         const token = jwt.sign(
             {id: account._id, username: account._username, accountType: account._accountType},
@@ -717,10 +719,19 @@ app.post('/login', async (req: Request, res: Response) => {
         );
 
 
-        res.status(200).json({'accountToken': token, 'accountId': account._id});
+        res.cookie("authToken", token, {
+            httpOnly: true,
+            secure: true, // Use only with HTTPS
+            // @ts-ignore
+            sameSite: "Strict", // Prevent CSRF attacks
+            maxAge: 3600 * 1000, // 1 hour in milliseconds
+        });
+
+
+        return res.status(200).json({'accountType': account._accountType , 'accountId': account._id});
     } catch (error) {
         console.error("Error during login:", error);
-        res.status(500).send("Internal Server Error");
+        return res.status(500).send("Internal Server Error");
     }
 });
 
