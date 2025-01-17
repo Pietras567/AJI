@@ -4,13 +4,43 @@ import axios from "axios";
 export default {
   data() {
     return {
-      cart: []
+      cart: [],
+      orderStatuses: [],
     };
   },
   created() {
     this.finalizeCart();
+    this.fetchOrderStatuses();
   },
   methods: {
+    async fetchOrderStatuses() {
+      try {
+        const response = await axios.get("http://localhost:3000/status");
+        console.log(response.data);
+        //response.data.forEach((status) => this.orderStatuses.push(status._currentStatus));
+        this.orderStatuses = response.data;
+        console.log(this.orderStatuses)
+      } catch (error) {
+        console.error("Error fetching statuses:", error);
+      }
+    },
+    setCookie(name, value, hours) {
+      const d = new Date();
+      d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    },
+    getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) {
+          return c.substring(nameEQ.length, c.length);
+        }
+      }
+      return null;
+    },
     async finalizeCart() {
       try {
         console.log("cart hello world");
@@ -21,6 +51,7 @@ export default {
           this.cart.push({id: element.id, quantity: element.quantity, product: response.data, price: response.data._price * element.quantity});
         }
         this.cart.forEach((element) => console.log(element))
+        console.log(this.cart);
       } catch (error) {
         console.error('Error loading cart: ', error);
       }
@@ -41,7 +72,32 @@ export default {
       alert('Product deleted from cart successfully!');
     },
     async finalizeOrder() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      var products = []
 
+      for (const product of cart) {
+        products.push({"productId": product.id, "quantity": product.quantity});
+      }
+
+      const firstStatus = this.orderStatuses.shift()
+      console.log(firstStatus)
+      console.log(firstStatus._id)
+      await axios.post('http://localhost:3000/orders', {
+        statusId: firstStatus._id,
+        userId: this.getCookie("id"),
+        orderDate: new Date().toISOString(),
+        products: products,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(function (response) {
+        console.log(response);
+        if (response.status === 200) {
+          this.$refs.form.reset();
+        }
+      }).catch(function (error) {
+        console.log(error);
+      });
     },
     updateQuantity(productId, newQuantity) {
       console.log(`Updating product ID ${productId} to quantity ${newQuantity}`);

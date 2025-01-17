@@ -152,7 +152,7 @@ export default {
             });
 
         const type = response.data.accountType;
-        const id = response.data.accountId;
+        const id = response.data.userId;
 
         this.setCookie("type", type, 1);
         this.setCookie("id", id, 1);

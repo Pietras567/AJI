@@ -27,6 +27,7 @@ export default {
   created() {
     this.fetchProducts();
     this.fetchCategories();
+    this.fetchOrderStatuses();
   },
   methods: {
     async fetchProducts() {
@@ -158,7 +159,6 @@ export default {
       this.activeSection = section;
       if (section === 'orders') {
         this.fetchOrders();
-        this.fetchOrderStatuses();
       }
     },
     async fetchOrders() {
@@ -172,8 +172,8 @@ export default {
     async fetchOrderStatuses() {
       try {
         const response = await axios.get("http://localhost:3000/status");
-        response.data.forEach((element) => this.categories.push(element._name))
-        this.orderStatuses = response.data;
+        console.log(response.data);
+        response.data.forEach((status) => this.orderStatuses.push(status._currentStatus));
       } catch (error) {
         console.error("Error fetching statuses:", error);
       }
@@ -216,7 +216,6 @@ export default {
 
       this.$emit('submitAddProduct', this.category);
       console.log(this.category)
-      //console.log(this.categories.find(this.category))
 
       this.$emit('submitAddProduct', this.description);
       console.log(this.description)
@@ -232,6 +231,9 @@ export default {
         }
       }).then(function (response) {
         console.log(response);
+        if (response.status === 200) {
+          this.$refs.form.reset();
+        }
       }).catch(function (error) {
         console.log(error);
       });
@@ -282,35 +284,37 @@ export default {
         <transition name="slide">
           <div v-if="isAddProductSectionVisible" class="section">
             Adding product form.
-            <!--Name-->
-            <div>Name: <!--{{ productName }}--></div>
-            <input v-model="productName" placeholder="Write name" />
+            <form>
+              <!--Name-->
+              <div>Name: <!--{{ productName }}--></div>
+              <input v-model="productName" placeholder="Write name" />
 
-            <!--Price-->
-            <p>Price: <!--{{ price }}--></p>
-            <input v-model.number="price" placeholder="Write price" />
+              <!--Price-->
+              <p>Price: <!--{{ price }}--></p>
+              <input v-model.number="price" placeholder="Write price" />
 
-            <!--Weight-->
-            <p>Weight: <!--{{ weight }}--></p>
-            <input v-model.number="weight" placeholder="Write weight" />
+              <!--Weight-->
+              <p>Weight: <!--{{ weight }}--></p>
+              <input v-model.number="weight" placeholder="Write weight" />
 
-            <!--Category-->
-            <div>Category: <!--{{ category }}--></div>
-            <select v-model="category">
-              <option disabled value="">Please select one</option>
-              <option v-for="(item, key) in categories" :value="key">
-                {{item}}
-              </option>
-            </select>
+              <!--Category-->
+              <div>Category: <!--{{ category }}--></div>
+              <select v-model="category">
+                <option disabled value="">Please select one</option>
+                <option v-for="(item, key) in categories" :value="key">
+                  {{item}}
+                </option>
+              </select>
 
-            <!--Description-->
-            <div>Description:</div>
-            <!--<div style="white-space: pre-line;">{{ description }}</div>-->
-            <textarea v-model="description" placeholder="write description"></textarea>
+              <!--Description-->
+              <div>Description:</div>
+              <!--<div style="white-space: pre-line;">{{ description }}</div>-->
+              <textarea v-model="description" placeholder="write description"></textarea>
 
-            <div>
-              <button type="submit" @click="submitAddProduct">Submit</button>
-            </div>
+              <div>
+                <button type="submit" @click="submitAddProduct">Submit</button>
+              </div>
+            </form>
           </div>
         </transition>
       </div>
@@ -468,7 +472,7 @@ export default {
               v-for="status in orderStatuses"
               :key="status"
               :value="status">
-            {{ status.currentStatus }}
+            {{ status }}
           </option>
         </select>
       </div>

@@ -727,8 +727,11 @@ app.post('/login', async (req: Request, res: Response) => {
             maxAge: 3600 * 1000,
         });
 
-
-        return res.status(200).json({'accountType': account._accountType , 'accountId': account._id});
+        const userRepository = AppDataSource.getRepository(User);
+        // @ts-ignore
+        const user = await userRepository.findOneBy({_username: account._userName})
+        // @ts-ignore
+        return res.status(200).json({'accountType': account._accountType , 'userId': user.id});
     } catch (error) {
         console.error("Error during login:", error);
         return res.status(500).send("Internal Server Error");

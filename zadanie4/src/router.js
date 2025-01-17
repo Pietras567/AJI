@@ -1,7 +1,7 @@
 import ProductTable from "@/components/ProductTable.vue";
 import CartView from "@/components/CartView.vue";
 import Authentication from "@/components/AuthenticationView.vue";
-import {createMemoryHistory, createRouter} from "vue-router";
+import {createMemoryHistory, createRouter, createWebHistory} from "vue-router";
 import DashboardView from "@/components/DashboardView.vue";
 
 function getCookie(name) {
@@ -51,7 +51,7 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createMemoryHistory(),
+    history: createWebHistory(),
     routes,
 })
 
