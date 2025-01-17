@@ -150,7 +150,7 @@ export default {
         const response = await axios.post('http://localhost:3000/login', data,
             {withCredentials: true,
             });
-        
+
         const type = response.data.accountType;
         const id = response.data.accountId;
 

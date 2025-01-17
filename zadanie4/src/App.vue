@@ -34,17 +34,22 @@ export default {
               <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                   <RouterLink class="nav-link" to="/">
-                    <img src="@/assets/home.png" alt="Home" height="45"/>
+                    <img src="@/assets/home.svg" alt="Home" height="45"/>
                   </RouterLink>
                 </li>
                 <li class="nav-item">
                   <RouterLink class="nav-link" to="/cart">
-                    <img src="@/assets/cart.png" alt="Cart" height="45"/>
+                    <img src="@/assets/cart.svg" alt="Cart" height="45"/>
                   </RouterLink>
                 </li>
-                <li class="nav-item">
+                <!--<li class="nav-item">
                   <RouterLink class="nav-link" to="/authentication">
                     <img src="@/assets/login.png" alt="Log in" height="45"/>
+                  </RouterLink>
+                </li>-->
+                <li class="nav-item">
+                  <RouterLink class="nav-link" to="/dashboard">
+                    <img src="@/assets/dashboard.svg" alt="Dashboard" height="45"/>
                   </RouterLink>
                 </li>
               </ul>
@@ -84,7 +89,7 @@ export default {
 body {
   background-color: #f8f9fa;
 }
-.home-container {
+.home-container2 {
   background: url('@/assets/home-background.jpg') no-repeat center center;
   background-size: cover;
   color: white;
@@ -101,5 +106,23 @@ body {
 }
 .features-container img {
   border-radius: 50%;
+}
+
+.home-container {
+  width: 100%;
+  height: 125px;
+  --s: 50px;
+  --c: #17cadd;
+  --_s: calc(2*var(--s)) calc(2*var(--s));
+  --_g: 35.36% 35.36% at;
+  --_c: #0000 66%, #494adf 68% 70%,#0000 72%;
+  background:
+      radial-gradient(var(--_g) 100% 25%,var(--_c)) var(--s) var(--s)/var(--_s),
+      radial-gradient(var(--_g) 0 75%,var(--_c)) var(--s) var(--s)/var(--_s),
+      radial-gradient(var(--_g) 100% 25%,var(--_c)) 0 0/var(--_s),
+      radial-gradient(var(--_g) 0 75%,var(--_c)) 0 0/var(--_s),
+      repeating-conic-gradient(var(--c) 0 25%,#0000 0 50%) 0 0/var(--_s),
+      radial-gradient(var(--_c)) 0 calc(var(--s)/2)/var(--s) var(--s) var(--c);
+  background-attachment: fixed;
 }
 </style>
