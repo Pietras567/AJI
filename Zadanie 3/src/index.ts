@@ -366,8 +366,9 @@ app.post('/orders', authenticateJWT(), async (req: Request, res: Response) => {
             _status: status,
             _user: user,
             _orderDate: new Date(orderDate),
+            _totalPrice: 0,
         });
-
+        await orderRepository.save(order);
 
         //Dodanie produktów do zamówienia
         const productItemRepository = AppDataSource.getRepository(ProductItem);
