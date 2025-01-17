@@ -29,9 +29,10 @@ export default {
       return null;
     },
     logout() {
-      document.cookie = 'authToken=; Max-Age=0'; // Usunięcie tokenu
-      this.setCookie("type", undefined, 1)
-      this.setCookie("id", undefined, 1)
+      // Usunięcie tokenu
+      document.cookie = 'authToken=; Max-Age=0';
+      document.cookie = 'type=; Max-Age=0';
+      document.cookie = 'id=; Max-Age=0';
       this.$router.push('/authentication');
       print("kliknieto logout");
     },

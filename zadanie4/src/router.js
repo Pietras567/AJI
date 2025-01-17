@@ -40,7 +40,7 @@ const routes = [
         name: 'DashboardView',
         beforeEnter: (to, from, next) => {
             const isLog = getCookie("id");
-            if (isLog == null) {
+            if (!isLog) {
                 next('/authentication');
             } else {
                 next();

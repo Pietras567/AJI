@@ -15,6 +15,13 @@ export default {
       orderStatuses: [],
       selectedStatus: null,
       validationError: null,
+      isAddProductSectionVisible: false,
+      productName: '',
+      price: 0,
+      weight: 0,
+      category: '',
+      description: '',
+      AddProductdata: undefined,
     };
   },
   created() {
@@ -192,8 +199,45 @@ export default {
         console.error("Error updating order status:", error);
       }
     },
-  },
 
+    toggleAddProductSection() {
+      this.isAddProductSectionVisible = !this.isAddProductSectionVisible;
+    },
+    async submitAddProduct() {
+      console.log("POST product");
+      this.$emit('submitAddProduct', this.productName);
+      console.log(this.productName)
+
+      this.$emit('submitAddProduct', this.price);
+      console.log(this.price)
+
+      this.$emit('submitAddProduct', this.weight);
+      console.log(this.weight)
+
+      this.$emit('submitAddProduct', this.category);
+      console.log(this.category)
+      //console.log(this.categories.find(this.category))
+
+      this.$emit('submitAddProduct', this.description);
+      console.log(this.description)
+
+      await axios.post('http://localhost:3000/products', {
+        _name: this.productName,
+        _description: this.description,
+        _price: this.price,
+        _weight: this.weight,
+        categoryId: this.category,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(function (response) {
+        console.log(response);
+      }).catch(function (error) {
+        console.log(error);
+      });
+
+    },
+  },
 
   watch: {
     filterName() {
@@ -231,7 +275,46 @@ export default {
 
     <div v-if="activeSection === 'products'">
       <h2>Products Management</h2>
-    <div>
+      <div>
+        <button @click="toggleAddProductSection">
+          {{ isAddProductSectionVisible ? 'Hide section' : 'Add product' }}
+        </button>
+        <transition name="slide">
+          <div v-if="isAddProductSectionVisible" class="section">
+            Adding product form.
+            <!--Name-->
+            <div>Name: <!--{{ productName }}--></div>
+            <input v-model="productName" placeholder="Write name" />
+
+            <!--Price-->
+            <p>Price: <!--{{ price }}--></p>
+            <input v-model.number="price" placeholder="Write price" />
+
+            <!--Weight-->
+            <p>Weight: <!--{{ weight }}--></p>
+            <input v-model.number="weight" placeholder="Write weight" />
+
+            <!--Category-->
+            <div>Category: <!--{{ category }}--></div>
+            <select v-model="category">
+              <option disabled value="">Please select one</option>
+              <option v-for="(item, key) in categories" :value="key">
+                {{item}}
+              </option>
+            </select>
+
+            <!--Description-->
+            <div>Description:</div>
+            <!--<div style="white-space: pre-line;">{{ description }}</div>-->
+            <textarea v-model="description" placeholder="write description"></textarea>
+
+            <div>
+              <button type="submit" @click="submitAddProduct">Submit</button>
+            </div>
+          </div>
+        </transition>
+      </div>
+      <div>
         <div>
           <label for="file-upload" class="form-label">Upload Product JSON File:</label>
           <input type="file" id="file-upload" class="form-control" @change="handleFileUpload"/>
@@ -443,5 +526,29 @@ export default {
 <style>
 body {
   background-color: #f8f9fa;
+}
+.section {
+  padding: 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  max-height: 200px; /* Dopasuj wysokość do treści */
+  opacity: 1;
 }
 </style>

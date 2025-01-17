@@ -9,11 +9,11 @@ export default {
 </script>
 
 <template>
-  <div class="wrapper w-100 p-0">
+  <div class="wrapper w-100 p-0 position-static">
     <header class="home-container w-100">
       <div class="container-fluid d-flex justify-content-between align-items-center px-0">
-        <img alt="Logo" class="logo" src="@/assets/logo.png" style="height: 100%; max-height: 125px;" />
-        <div class="text-center flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+        <img alt="Logo" class="logo" src="@/assets/logo.svg" style="height: 70%; max-height: 80px; margin-top: 1%; margin-left: 1%" />
+        <div class="text-center flex-grow-1 d-flex flex-column justify-content-center align-items-center" style="margin: auto; width: 100%; position: absolute">
           <h1 class="mb-0">Najmanka</h1>
           <p class="text-muted">Discover amazing products at unbeatable prices</p>
         </div>
