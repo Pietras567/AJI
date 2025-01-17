@@ -38,7 +38,7 @@ const AppDataSource = new DataSource({
 const app = express();
 // @ts-ignore
 
-app.use(cors({origin: 'http://localhost:5173',  // The URL of your frontend application (change this if necessary)
+app.use(cors({origin: 'http://localhost:5173',
     credentials: true,}));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -721,10 +721,10 @@ app.post('/login', async (req: Request, res: Response) => {
 
         res.cookie("authToken", token, {
             httpOnly: true,
-            secure: true, // Use only with HTTPS
+            secure: true,
             // @ts-ignore
-            sameSite: "Strict", // Prevent CSRF attacks
-            maxAge: 3600 * 1000, // 1 hour in milliseconds
+            sameSite: "Strict",
+            maxAge: 3600 * 1000,
         });
 
 
