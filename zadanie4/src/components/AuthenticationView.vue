@@ -117,6 +117,25 @@ export default {
     };
   },
   methods: {
+    setCookie(name, value, hours) {
+      const d = new Date();
+      d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    },
+
+    getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) {
+          return c.substring(nameEQ.length, c.length);
+        }
+      }
+      return null;
+    },
+
     togglePassword() {
       this.showPassword = !this.showPassword;
     },
@@ -131,10 +150,12 @@ export default {
         const response = await axios.post('http://localhost:3000/login', data,
             {withCredentials: true,
             });
+        
+        const type = response.data.accountType;
+        const id = response.data.accountId;
 
-        // const token = response.data.token;
-
-
+        this.setCookie("type", type, 1);
+        this.setCookie("id", id, 1);
 
         console.log("Login successful");
         this.$router.push('/');
@@ -151,10 +172,11 @@ export default {
       } else {
         this.phoneNumberError = "";
       }
-      if (this.validateEmail(this.email)) {
-        this.emailError = "";
+      if (!this.validateEmail(this.email)) {
+        this.emailError = "Invalid email address";
+        return;
       } else {
-        //this.emailError = "Invalid email address";
+        this.emailError = "";
       }
       if (this.password === this.confirmPassword) {
         this.errorMessage = "";
@@ -169,7 +191,8 @@ export default {
         let userData = response.data;
 
         if (response.status !== 200) {
-          this.errorMessage = userData.message;
+          this.errorMessage = userData.json();
+          return;
         }
 
         this.isRegister = false;
@@ -179,7 +202,7 @@ export default {
       }
     },
     validateEmail(email) {
-      const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     },
     validatePhoneNumber(phoneNumber) {
