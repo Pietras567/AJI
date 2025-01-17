@@ -368,13 +368,14 @@ app.post('/orders', authenticateJWT(), async (req: Request, res: Response) => {
             _orderDate: new Date(orderDate),
         });
 
-        await orderRepository.save(order);
 
         //Dodanie produktów do zamówienia
         const productItemRepository = AppDataSource.getRepository(ProductItem);
         const productRepository = AppDataSource.getRepository(Product);
 
         const productReturnList: ProductItem[] = []
+
+        var totalPrice = 0;
 
         for (const productData of products) {
             // @ts-ignore
@@ -402,7 +403,13 @@ app.post('/orders', authenticateJWT(), async (req: Request, res: Response) => {
             productReturnList.push(productItem);
 
             await productItemRepository.save(productItem);
+
+            totalPrice += productData.quantity * product.price;
+
         }
+
+        order.totalPrice = totalPrice;
+        await orderRepository.save(order);
 
         function replacer(key: string, value: any) {
             if (key === '_order') {

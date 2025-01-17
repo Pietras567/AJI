@@ -25,13 +25,24 @@ export class Order {
   @OneToMany(() => Opinion, (opinion) => opinion._order)
   private _opinions!: Opinion[];
 
-  constructor(status: OrderStatus, user: User, orderDate?: Date) {
+  @Column("int")
+  private _totalPrice: number;
+
+  constructor(status: OrderStatus, user: User, totalPrice: number, orderDate?: Date) {
     this._status = status;
     this._user = user;
     this._orderDate = orderDate;
+    this._totalPrice = totalPrice;
   }
 
 
+  get totalPrice(): number {
+    return this._totalPrice;
+  }
+
+  set totalPrice(value: number) {
+    this._totalPrice = value;
+  }
 
   get orderDate(): Date | undefined {
     return this._orderDate;

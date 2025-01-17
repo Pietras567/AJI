@@ -492,23 +492,23 @@ export default {
         <tbody>
         <tr v-for="order in orders" :key="order._id">
           <td>{{ order._id }}</td>
-          <td>{{ order.customerName }}</td>
+          <td>{{ order._user._userName }}</td>
           <td>
             <ul>
               <li v-for="product in order.productList" :key="product._id">
-                {{ product._product.name }} - {{ product._product.price }}$
+                {{ product._product._name }} - {{ product._product._price }}$
               </li>
             </ul>
           </td>
-          <td>{{ order.totalPrice }}</td>
+          <td>{{ order._totalPrice }}</td>
           <td>
             <select
                 class="form-select"
-                v-model="order.status._id"
+                v-model="order.status"
                 @change="updateOrderStatus(order._id, order.status._id)"
             >
               <option v-for="status in orderStatuses" :key="status._id" :value="status._id">
-                {{ status.currentStatus }}
+                {{ status }}
               </option>
             </select>
           </td>
