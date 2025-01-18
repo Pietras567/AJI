@@ -18,6 +18,7 @@ export default {
   created() {
     this.fetchOrders();
     this.fetchOrderStatuses();
+    this.fetchOpinions();
   },
   methods: {
 
@@ -56,15 +57,22 @@ export default {
 
     async fetchOpinions() {
       try {
-        const response = await axios.get("http://localhost:3000/opinions");
+        const response = await axios.get("http://localhost:3000/opinions", {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
         this.opinions = await response.data;
         console.log(this.opinions);
       } catch (error) {
         console.error("Error fetching opinions:", error);
       }
     },
-
-
+    hasOpinion(orderId) {
+      // Sprawdza, czy istnieje opinia dla danego zamówienia
+      return this.opinions.some(opinion => opinion.orderId === orderId);
+    },
     filterOrdersByStatus() {
       return this.orders.filter((order) => {
         return this.selectedStatus ? order.status === this.selectedStatus : true;
@@ -87,12 +95,18 @@ export default {
         const response = await axios.post(`http://localhost:3000/orders/${this.opinionOrderId}/opinions`, {
           content: this.opinion,
           rating: this.rating,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
         });
 
         alert(response.data.message || "Opinion submitted successfully!");
         this.opinionOrderId = null;
         this.rating = 0;
         this.opinion = "";
+        location.reload();
       } catch (error) {
         console.error("Error submitting opinion:", error);
         alert("Failed to submit opinion. Please try again.");
@@ -163,7 +177,7 @@ export default {
           <td>
             <!-- Opinion Button -->
             <button
-                v-if="['Executed', 'Cancelled'].includes(order._status._currentStatus)"
+                v-if="['Executed', 'Cancelled'].includes(order._status._currentStatus) && !hasOpinion(order._id)"
                 class="btn btn-secondary btn-sm"
                 @click="openOpinionModal(order._id)"
             >

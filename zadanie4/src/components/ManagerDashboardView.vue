@@ -550,7 +550,7 @@ export default {
           </td>
           <td>
             <!-- Add any additional actions here -->
-            <button class="btn btn-danger btn-sm" @click="cancelOrder(order._id)">
+            <button class="btn btn-danger btn-sm" @click="updateOrderStatus(order._id, this.orderStatuses.find(status => status._currentStatus === 'Cancelled')._id)">
               Cancel Order
             </button>
           </td>

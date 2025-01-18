@@ -778,7 +778,13 @@ app.post('/login', async (req: Request, res: Response) => {
 
         const userRepository = AppDataSource.getRepository(User);
         // @ts-ignore
-        const user = await userRepository.findOneBy({_username: account._userName})
+        const user = await userRepository.findOne({where: {_userName: account._username}, relations: ['_account']})
+        // @ts-ignore
+        console.log("id: " + user.id);
+        // @ts-ignore
+        console.log("username: " + user.userName);
+        // @ts-ignore
+        console.log("acc name: " + account._username);
         // @ts-ignore
         return res.status(200).json({'accountType': account._accountType , 'userId': user.id});
     } catch (error) {
@@ -946,7 +952,7 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
 
         const existingOpinion = await opinionRepository.findOne({
             // @ts-ignore
-            where: { order: { _id: order._id } },
+            where: { _order: { _id: order._id } },
         });
 
         if (existingOpinion) {
