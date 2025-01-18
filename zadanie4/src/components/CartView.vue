@@ -73,31 +73,42 @@ export default {
     },
     async finalizeOrder() {
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      var products = []
+      const products = cart.map(product => ({
+        productId: product.id,
+        quantity: product.quantity
+      }));
 
-      for (const product of cart) {
-        products.push({"productId": product.id, "quantity": product.quantity});
+      if (products.length === 0) {
+        alert('Your cart is empty!');
+        return;
       }
 
-      const firstStatus = this.orderStatuses.shift()
-      console.log(firstStatus)
-      console.log(firstStatus._id)
-      await axios.post('http://localhost:3000/orders', {
-        statusId: firstStatus._id,
-        userId: this.getCookie("id"),
-        orderDate: new Date().toISOString(),
-        products: products,
-        headers: {
-          'Content-Type': 'application/json'
+      try {
+        const response = await axios.post('http://localhost:3000/orders', {
+          statusId: 1,
+          userId: this.getCookie("id"),
+          orderDate: new Date().toISOString(),
+          products: products,
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          console.log(response);
+
+          this.cart = [];
+          localStorage.removeItem('cart');
+          alert('Order finalized and cart cleared!');
+          // this.$refs.form.reset();
+          // return;
+
         }
-      }).then(function (response) {
-        console.log(response);
-        if (response.status === 200) {
-          this.$refs.form.reset();
-        }
-      }).catch(function (error) {
-        console.log(error);
-      });
+      } catch (error) {
+        console.error('Error finalizing order:', error);
+        alert('Failed to finalize the order. Please try again.');
+      }
     },
     updateQuantity(productId, newQuantity) {
       console.log(`Updating product ID ${productId} to quantity ${newQuantity}`);
