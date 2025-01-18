@@ -1,6 +1,6 @@
 import express, {NextFunction, Request, Response} from 'express';
 import bodyParser from 'body-parser';
-import {DataSource, ObjectLiteral} from "typeorm";
+import {DataSource, Equal, ObjectLiteral} from "typeorm";
 import {ProductItem} from "./entities/ProductItem";
 import {Category} from "./entities/Category";
 import {Order} from './entities/Order';
@@ -279,6 +279,47 @@ app.get('/orders', async (req: Request, res: Response) => {
         const ordersRepository = AppDataSource.getRepository(Order);
         const productItemRepository = AppDataSource.getRepository(ProductItem);
         const orders = await ordersRepository.find();
+
+        const ordersWithProducts = await Promise.all(
+            orders.map(async (order) => {
+                const productItems = await productItemRepository.find({
+                    // @ts-ignore
+                    where: {_order: order},
+                    relations: ["_product"]
+                });
+
+                return {...order, productList: productItems};
+            })
+        );
+
+        res.json(ordersWithProducts);
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+//Pobierz zamówienia
+// @ts-ignore
+app.get('/orders/:id', async (req: Request, res: Response) => {
+    try {
+        var id = parseInt(req.params.id);
+
+        const ordersRepository = AppDataSource.getRepository(Order);
+        const productItemRepository = AppDataSource.getRepository(ProductItem);
+
+        const usersRepository = AppDataSource.getRepository(User);
+        // @ts-ignore
+        const user = await usersRepository.findOne({ where: { _id: id } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const orders = await ordersRepository.find({
+            // @ts-ignore
+            where: { _user: user }, // Bezpośrednie odwołanie do użytkownika
+            relations: ["_user"],  // Dodaj relacje, jeśli są potrzebne
+        });
 
         const ordersWithProducts = await Promise.all(
             orders.map(async (order) => {
