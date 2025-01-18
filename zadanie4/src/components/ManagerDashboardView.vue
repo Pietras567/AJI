@@ -173,7 +173,8 @@ export default {
       try {
         const response = await axios.get("http://localhost:3000/status");
         console.log(response.data);
-        response.data.forEach((status) => this.orderStatuses.push(status._currentStatus));
+        //response.data.forEach((status) => this.orderStatuses.push(status._currentStatus));
+        this.orderStatuses = response.data;
       } catch (error) {
         console.error("Error fetching statuses:", error);
       }
@@ -188,6 +189,10 @@ export default {
     },
     async updateOrderStatus(orderId, statusId) {
       try {
+        console.log(orderId)
+        console.log(statusId)
+        console.log(this.orders)
+
         const response = await axios.patch(`http://localhost:3000/orders/${orderId}`, {statusId});
         const updatedOrder = response.data;
 
@@ -504,11 +509,11 @@ export default {
           <td>
             <select
                 class="form-select"
-                v-model="order.status"
-                @change="updateOrderStatus(order._id, order.status._id)"
+                v-model="order._status"
+                @change="updateOrderStatus(order._id, order._status._id)"
             >
-              <option v-for="status in orderStatuses" :key="status._id" :value="status._id">
-                {{ status }}
+              <option v-for="_status in orderStatuses" :key="_status" :value="_status">
+                {{ _status._currentStatus }}
               </option>
             </select>
           </td>
