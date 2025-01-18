@@ -6,9 +6,12 @@ export default {
     return {
       activeSection: 'orders',
       orders: [],
+      opinions: [],
       orderStatuses: [],
       selectedStatus: '',
       opinion: '',
+      rating: 0,
+      selectedOrderDate: "",
       opinionOrderId: null,
     };
   },
@@ -33,11 +36,10 @@ export default {
     async fetchOrders() {
       try {
         const userId = this.getCookie("id");
-
-        const response = await axios.get("http://localhost:3000/orders");
         console.log("fetchin orders for user:" + userId);
-        // this.orders = response.data.filter(order => order.User_Id === userId);
+        const response = await axios.get(`http://localhost:3000/orders/clients/${userId}`);
         this.orders = await response.data;
+        console.log(this.orders);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -46,10 +48,23 @@ export default {
       try {
         const response = await axios.get("http://localhost:3000/status");
         this.orderStatuses = response.data.map((status) => status._currentStatus);
+        console.log(this.orderStatuses);
       } catch (error) {
         console.error("Error fetching statuses:", error);
       }
     },
+
+    async fetchOpinions() {
+      try {
+        const response = await axios.get("http://localhost:3000/opinions");
+        this.opinions = await response.data;
+        console.log(this.opinions);
+      } catch (error) {
+        console.error("Error fetching opinions:", error);
+      }
+    },
+
+
     filterOrdersByStatus() {
       return this.orders.filter((order) => {
         return this.selectedStatus ? order.status === this.selectedStatus : true;
@@ -59,19 +74,25 @@ export default {
       this.opinionOrderId = orderId;
       this.opinion = '';
     },
+    setRating(star) {
+      this.rating = star;
+    },
     async submitOpinion() {
       try {
-        if (!this.opinion.trim()) {
+        if (!this.rating || this.opinion.trim() === "") {
           alert("Opinion cannot be empty.");
           return;
         }
 
         const response = await axios.post(`http://localhost:3000/orders/${this.opinionOrderId}/opinions`, {
-          opinion: this.opinion,
+          content: this.opinion,
+          rating: this.rating,
         });
 
         alert(response.data.message || "Opinion submitted successfully!");
         this.opinionOrderId = null;
+        this.rating = 0;
+        this.opinion = "";
       } catch (error) {
         console.error("Error submitting opinion:", error);
         alert("Failed to submit opinion. Please try again.");
@@ -84,6 +105,23 @@ export default {
 <template>
   <div class="container mt-5">
     <h1 class="my-4 text-center">Client Dashboard</h1>
+
+    <div class="mb-4 text-center">
+      <button
+          class="btn btn-primary me-2"
+          :class="{ active: activeSection === 'orders' }"
+          @click="activeSection = 'orders'; fetchOrders()"
+      >
+        Orders
+      </button>
+      <button
+          class="btn btn-primary"
+          :class="{ active: activeSection === 'opinions' }"
+          @click="activeSection = 'opinions'; fetchOpinions()"
+      >
+        Opinions
+      </button>
+    </div>
 
     <div v-if="activeSection === 'orders'">
       <h2>Your Orders</h2>
@@ -121,11 +159,11 @@ export default {
             </ul>
           </td>
           <td>{{ order._totalPrice }} PLN</td>
-          <td>{{ order.status }}</td>
+          <td>{{ order._status._currentStatus }}</td>
           <td>
             <!-- Opinion Button -->
             <button
-                v-if="['Executed', 'Cancelled'].includes(order.status)"
+                v-if="['Executed', 'Cancelled'].includes(order._status._currentStatus)"
                 class="btn btn-secondary btn-sm"
                 @click="openOpinionModal(order._id)"
             >
@@ -137,6 +175,29 @@ export default {
       </table>
     </div>
 
+    <div v-if="activeSection === 'opinions'">
+      <h2>Your Opinions</h2>
+      <table class="table table-bordered">
+        <thead>
+        <tr>
+          <th>Opinion ID</th>
+          <th>Content</th>
+          <th>Rating</th>
+          <th>Order ID</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="opinion in opinions" :key="opinion._id">
+          <td>{{ opinion.id }}</td>
+          <td>{{ opinion.content }}</td>
+          <td>{{ opinion.rating }}</td>
+          <td>{{ opinion.orderId }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+
     <!-- Opinion Modal -->
     <div v-if="opinionOrderId" class="modal d-block">
       <div class="modal-dialog">
@@ -146,6 +207,30 @@ export default {
             <button type="button" class="btn-close" @click="opinionOrderId = null"></button>
           </div>
           <div class="modal-body">
+            <!-- Display Order Date -->
+            <div class="mb-3">
+              <label class="form-label">Order Date:</label>
+              <p>{{ selectedOrderDate }}</p>
+            </div>
+
+            <!-- Rating -->
+            <div class="mb-3">
+              <label class="form-label">Rating:</label>
+              <div>
+            <span
+                v-for="star in 5"
+                :key="star"
+                class="star"
+                :class="{ 'text-warning': star <= rating, 'text-muted': star > rating }"
+                @click="setRating(star)"
+                style="cursor: pointer; font-size: 1.5em;"
+            >
+              ★
+            </span>
+              </div>
+            </div>
+
+            <!-- Opinion Text Area -->
             <textarea
                 v-model="opinion"
                 class="form-control"
@@ -160,6 +245,7 @@ export default {
         </div>
       </div>
     </div>
+
   </div>
 </template>
 

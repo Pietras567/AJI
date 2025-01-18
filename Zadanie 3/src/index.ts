@@ -301,7 +301,7 @@ app.get('/orders', async (req: Request, res: Response) => {
 
 //Pobierz zamówienia
 // @ts-ignore
-app.get('/orders/:id', async (req: Request, res: Response) => {
+app.get('/orders/clients/:id', async (req: Request, res: Response) => {
     try {
         var id = parseInt(req.params.id);
 
@@ -944,6 +944,16 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
         }
 
 
+        const existingOpinion = await opinionRepository.findOne({
+            // @ts-ignore
+            where: { order: { _id: order._id } },
+        });
+
+        if (existingOpinion) {
+            return res.status(400).json({ error: "An opinion has already been added to this order" });
+        }
+
+
         const newOpinion = new Opinion(rating, content, order);
 
         await opinionRepository.save(newOpinion);
@@ -954,6 +964,97 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
         res.status(500).json({error: "Internal Server Error"});
     }
 });
+
+// @ts-ignore
+// app.get('/orders/:id/opinions',authenticateJWT(), async (req: Request, res: Response) => {
+//     const { id } = req.params;
+//
+//     try {
+//         const orderRepository = AppDataSource.getRepository(Order);
+//         const opinionRepository = AppDataSource.getRepository(Opinion);
+//
+//
+//         const order = await orderRepository.findOne({
+//             // @ts-ignore
+//             where: { _id: parseInt(id) },
+//             relations: ["_opinions"],
+//         });
+//
+//         if (!order) {
+//             return res.status(404).json({ error: "Order not found" });
+//         }
+//
+//         const userRepository = AppDataSource.getRepository(User);
+//
+//         const userFromOrder = await userRepository.findOne({
+//             // @ts-ignore
+//             where: { _id: order._user.id },
+//             relations: ["_account"],
+//         });
+//
+//         if (res.locals.accountId !== userFromOrder?._account._id) {
+//             return res.status(403).json({ error: "You can only view opinions for your own orders" });
+//         }
+//
+//         // @ts-ignore
+//         const opinions = order._opinions;
+//
+//         // const opinions2 = opinionRepository.find({
+//         //     // @ts-ignore
+//         //     where: {Order_id : parseInt(id)},
+//         //     relations: ["_order"]
+//         //     }
+//         // )
+//         return res.status(200).json(opinions);
+//     } catch (error) {
+//         console.error("Error fetching opinions:", error);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// });
+
+app.get('/opinions', authenticateJWT(), async (req: Request, res: Response) => {
+    try {
+        const userId = res.locals.accountId;
+
+        const opinionRepository = AppDataSource.getRepository(Opinion);
+        const orderRepository = AppDataSource.getRepository(Order);
+        const userRepository = AppDataSource.getRepository(User);
+
+        // Fetch all opinions for the user by checking orders linked to the user
+
+        const opinions = await opinionRepository.find({
+            relations: ["_order"], // Load the associated order for each opinion
+            // @ts-ignore
+            where: {
+                _order: { _user: { _id: userId } }
+            }
+        });
+
+        if (!opinions || opinions.length === 0) {
+            return res.status(404).json({ error: "No opinions found for this user's orders" });
+        }
+
+        // @ts-ignore
+        const opinionDetails = opinions.map(opinion => ({
+            // @ts-ignore
+            id: opinion._id,
+            // @ts-ignore
+            content: opinion._content,
+            // @ts-ignore
+            rating: opinion._rating,
+            // @ts-ignore
+            orderId: opinion._order._id,
+        }));
+
+        return res.status(200).json(opinionDetails);
+    } catch (error) {
+        console.error("Error fetching opinions:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
+
 
 // @ts-ignore
 app.post("/refresh-token", async (req: Request, res: Response) => {
