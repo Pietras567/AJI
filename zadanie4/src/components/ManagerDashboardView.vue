@@ -193,13 +193,35 @@ export default {
         console.log(statusId)
         console.log(this.orders)
 
-        const response = await axios.patch(`http://localhost:3000/orders/${orderId}`, {statusId});
-        const updatedOrder = response.data;
+        await axios.patch(`http://localhost:3000/orders/${orderId}`, {
+          statusId: statusId,
 
-        // Update local state
-        this.orders = this.orders.map(order =>
-            order._id === orderId ? updatedOrder : order
-        );
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        }).then(function (response) {
+          console.log(response);
+          if (response.status === 200) {
+            const updatedOrder = response.data;
+
+            // Update local state
+            this.orders = this.orders.map(order =>
+                order._id === orderId ? updatedOrder : order
+            );
+          }
+          if (response.status === 401) {
+            // logout
+            document.cookie = 'authToken=; Max-Age=0';
+            document.cookie = 'type=; Max-Age=0';
+            document.cookie = 'id=; Max-Age=0';
+            this.$router.push('/authentication');
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+
       } catch (error) {
         console.error("Error updating order status:", error);
       }
@@ -231,13 +253,22 @@ export default {
         _price: this.price,
         _weight: this.weight,
         categoryId: this.category,
+      }, {
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        withCredentials: true,
       }).then(function (response) {
         console.log(response);
         if (response.status === 200) {
           this.$refs.form.reset();
+        }
+        if (response.status === 401) {
+          // logout
+          document.cookie = 'authToken=; Max-Age=0';
+          document.cookie = 'type=; Max-Age=0';
+          document.cookie = 'id=; Max-Age=0';
+          this.$router.push('/authentication');
         }
       }).catch(function (error) {
         console.log(error);

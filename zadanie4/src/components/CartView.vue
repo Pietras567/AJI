@@ -94,20 +94,25 @@ export default {
             'Content-Type': 'application/json',
           },
         });
-
         if (response.status === 200 || response.status === 201) {
           console.log(response);
 
           this.cart = [];
           localStorage.removeItem('cart');
           alert('Order finalized and cart cleared!');
-          // this.$refs.form.reset();
-          // return;
 
         }
       } catch (error) {
         console.error('Error finalizing order:', error);
         alert('Failed to finalize the order. Please try again.');
+
+        if (error.status === 401) {
+          // logout
+          document.cookie = 'authToken=; Max-Age=0';
+          document.cookie = 'type=; Max-Age=0';
+          document.cookie = 'id=; Max-Age=0';
+          this.$router.push('/authentication');
+        }
       }
     },
     updateQuantity(productId, newQuantity) {

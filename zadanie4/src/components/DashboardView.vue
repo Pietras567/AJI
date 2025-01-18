@@ -43,10 +43,9 @@ export default {
 </script>
 
 <template>
-  <button @click="logout">Log out</button>
+  <button @click="logout" style="float: right; margin-right: 5%">Log out</button>
 
   <div>
-    <h1>Dashboard</h1>
     <div v-if="accountType === 'MANAGER'">
       <ManagerPage />
     </div>
