@@ -93,6 +93,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
           },
+          withCredentials: true,
         });
         if (response.status === 200 || response.status === 201) {
           console.log(response);

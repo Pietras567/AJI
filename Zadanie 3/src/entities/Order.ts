@@ -25,7 +25,7 @@ export class Order {
   @OneToMany(() => Opinion, (opinion) => opinion._order)
   private _opinions!: Opinion[];
 
-  @Column("int")
+  @Column("float")
   private _totalPrice: number;
 
   constructor(status: OrderStatus, user: User, totalPrice: number, orderDate?: Date) {
