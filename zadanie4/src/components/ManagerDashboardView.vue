@@ -9,11 +9,13 @@ export default {
       editedProduct: null,
       filterCategory: '',
       filterName: '',
+      filterStatus: '',
       filteredProducts: [],
+      filteredOrders: [],
       activeSection: 'products',
       orders: [],
       orderStatuses: [],
-      selectedStatus: null,
+      // selectedStatus: null,
       validationError: null,
       isAddProductSectionVisible: false,
       productName: '',
@@ -84,12 +86,26 @@ export default {
         const matchesName = product._name
             .toLowerCase()
             .includes(this.filterName.toLowerCase());
-        const matchesCategory = this.filterCategory
-            ? product._category._name === this.filterCategory
+
+        const matchesCategory = this.filterCategory._name
+            ? product._category._name === this.filterCategory._name
             : true;
         return matchesName && matchesCategory;
       });
     },
+
+    filterOrders() {
+
+      this.filteredOrders = this.orders.filter(order => {
+
+        const matchesStat = this.filterStatus._currentStatus
+            ? order._status._currentStatus === this.filterStatus._currentStatus
+            : true;
+
+        return matchesStat;
+      });
+    },
+
 
     async optimizeDescription(productId) {
       try {
@@ -182,6 +198,7 @@ export default {
       try {
         const response = await axios.get("http://localhost:3000/orders");
         this.orders = response.data;
+        this.filteredOrders = this.orders;
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -301,6 +318,9 @@ export default {
     filterCategory() {
       this.filterProducts();
     },
+    filterStatus() {
+      this.filterOrders();
+    }
 
   },
 };
@@ -406,7 +426,7 @@ export default {
                 :key="category"
                 :value="category"
             >
-              {{ category }}
+              {{ category._name }}
             </option>
           </select>
         </div>
@@ -491,7 +511,7 @@ export default {
 
             </template>
             <template v-else>
-              <span v-html="product._description"></span> <!-- Renders HTML content -->
+              <span v-html="product._description"></span>
             </template>
           </td>
           <td>
@@ -521,7 +541,7 @@ export default {
 
       <div class="mb-3">
         <label for="statusFilter" class="form-label">Filter by Status:</label>
-        <select id="statusFilter" class="form-select" v-model="selectedStatus">
+        <select id="statusFilter" class="form-select" v-model="filterStatus">
           <option value="">All statuses</option>
           <option
 
@@ -547,7 +567,7 @@ export default {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="order in orders" :key="order._id">
+        <tr v-for="order in filteredOrders" :key="order._id">
           <td>{{ order._id }}</td>
           <td>{{ order._user._userName }}</td>
           <td>
@@ -570,7 +590,6 @@ export default {
             </select>
           </td>
           <td>
-            <!-- Add any additional actions here -->
             <button class="btn btn-danger btn-sm"
                     @click="updateOrderStatus(order._id, this.orderStatuses.find(status => status._currentStatus === 'Cancelled')._id)">
               Cancel Order
