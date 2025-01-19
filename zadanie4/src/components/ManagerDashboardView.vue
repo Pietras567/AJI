@@ -340,22 +340,22 @@ export default {
             <form>
               <!--Name-->
               <div>Name: <!--{{ productName }}--></div>
-              <input v-model="productName" placeholder="Write name" />
+              <input v-model="productName" placeholder="Write name"/>
 
               <!--Price-->
               <p>Price: <!--{{ price }}--></p>
-              <input v-model.number="price" placeholder="Write price" />
+              <input v-model.number="price" placeholder="Write price"/>
 
               <!--Weight-->
               <p>Weight: <!--{{ weight }}--></p>
-              <input v-model.number="weight" placeholder="Write weight" />
+              <input v-model.number="weight" placeholder="Write weight"/>
 
               <!--Category-->
               <div>Category: <!--{{ category }}--></div>
               <select v-model="category">
                 <option disabled value="">Please select one</option>
                 <option v-for="(item) in categories" :value="item._id">
-                  {{item._name}}
+                  {{ item._name }}
                 </option>
               </select>
 
@@ -386,131 +386,133 @@ export default {
         </button>
       </div>
 
-    <div class="row mb-3">
-      <div class="col-md-6">
-        <label for="filter-name" class="form-label">Filter by Name:</label>
-        <input
-            id="filter-name"
-            type="text"
-            class="form-control"
-            v-model="filterName"
-            placeholder="Enter product name"
-        />
-      </div>
-      <div class="col-md-6">
-        <label for="filter-category" class="form-label">Filter by Category:</label>
-        <select id="filter-category" class="form-select" v-model="filterCategory">
-          <option value="">All Categories</option>
-          <option
-              v-for="category in categories"
-              :key="category"
-              :value="category"
-          >
-            {{ category }}
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <table class="table table-striped">
-      <thead>
-      <tr>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Weight</th>
-        <th>Category</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr
-          v-for="product in filteredProducts"
-          :key="product._id"
-      >
-        <td>
-          <template v-if="editedProduct && editedProduct._id === product._id">
-            <input
-                type="text"
-                class="form-control"
-                v-model="editedProduct._name"
-            />
-          </template>
-          <template v-else>{{ product._name }}</template>
-        </td>
-        <td>
-          <template v-if="editedProduct && editedProduct._id === product._id">
-            <input
-                type="number"
-                class="form-control"
-                v-model="editedProduct._price"
-            />
-          </template>
-          <template v-else>{{ product._price }} PLN</template>
-        </td>
-        <td>
-          <template v-if="editedProduct && editedProduct._id === product._id">
-            <input
-                type="number"
-                class="form-control"
-                v-model="editedProduct._weight"
-            />
-          </template>
-          <template v-else>{{ product._weight }} kg</template>
-        </td>
-        <td>
-          <template v-if="editedProduct && editedProduct._id === product._id">
-            <select
-                class="form-select"
-                v-model="editedProduct._category"
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="filter-name" class="form-label">Filter by Name:</label>
+          <input
+              id="filter-name"
+              type="text"
+              class="form-control"
+              v-model="filterName"
+              placeholder="Enter product name"
+          />
+        </div>
+        <div class="col-md-6">
+          <label for="filter-category" class="form-label">Filter by Category:</label>
+          <select id="filter-category" class="form-select" v-model="filterCategory">
+            <option value="">All Categories</option>
+            <option
+                v-for="category in categories"
+                :key="category"
+                :value="category"
             >
-              <option
-                  v-for="_category in categories"
-                  :key="_category._id"
-                  :value="_category"
+              {{ category }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Weight</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+            v-for="product in filteredProducts"
+            :key="product._id"
+        >
+          <td>
+            <template v-if="editedProduct && editedProduct._id === product._id">
+              <input
+                  type="text"
+                  class="form-control"
+                  v-model="editedProduct._name"
+              />
+            </template>
+            <template v-else>{{ product._name }}</template>
+          </td>
+          <td>
+            <template v-if="editedProduct && editedProduct._id === product._id">
+              <input
+                  type="number"
+                  class="form-control"
+                  v-model="editedProduct._price"
+              />
+            </template>
+            <template v-else>{{ product._price }} PLN</template>
+          </td>
+          <td>
+            <template v-if="editedProduct && editedProduct._id === product._id">
+              <input
+                  type="number"
+                  class="form-control"
+                  v-model="editedProduct._weight"
+              />
+            </template>
+            <template v-else>{{ product._weight }} kg</template>
+          </td>
+          <td>
+            <template v-if="editedProduct && editedProduct._id === product._id">
+              <select
+                  class="form-select"
+                  v-model="editedProduct._category"
               >
-                {{ _category._name }}
-              </option>
-            </select>
-          </template>
-          <template v-else>{{ product._category._name }}</template>
-        </td>
-        <td>
-          <template v-if="editedProduct && editedProduct._id === product._id">
+                <option
+                    v-for="_category in categories"
+                    :key="_category._id"
+                    :value="_category"
+                >
+                  {{ _category._name }}
+                </option>
+              </select>
+            </template>
+            <template v-else>{{ product._category._name }}</template>
+          </td>
+          <td>
+            <template v-if="editedProduct && editedProduct._id === product._id">
               <textarea
                   class="form-control"
                   v-model="editedProduct._description"
               ></textarea>
 
-            <button
-                class="btn btn-secondary btn-sm"
-                @click="optimizeDescription(product._id)"
-            >
-              Optimize Description
-            </button>
+              <button
+                  class="btn btn-secondary btn-sm"
+                  @click="optimizeDescription(product._id)"
+              >
+                Optimize Description
+              </button>
 
-          </template>
-          <template v-else>{{ product._description }}</template>
-        </td>
-        <td>
-          <template v-if="editedProduct && editedProduct._id === product._id">
-            <!--            <button class="btn btn-info btn-sm" @click="optimizeDescription(editedProduct)">Optimise description</button>/-->
-            <button class="btn btn-success" @click="saveProduct">Save</button>
-            <button class="btn btn-secondary" @click="cancelEditing">Cancel</button>
+            </template>
+            <template v-else>
+              <span v-html="product._description"></span> <!-- Renders HTML content -->
+            </template>
+          </td>
+          <td>
+            <template v-if="editedProduct && editedProduct._id === product._id">
+              <!--            <button class="btn btn-info btn-sm" @click="optimizeDescription(editedProduct)">Optimise description</button>/-->
+              <button class="btn btn-success" @click="saveProduct">Save</button>
+              <button class="btn btn-secondary" @click="cancelEditing">Cancel</button>
 
-          </template>
-          <template v-else>
-            <button
-                class="btn btn-primary"
-                @click="startEditing(product)"
-            >
-              Edit
-            </button>
-          </template>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+            </template>
+            <template v-else>
+              <button
+                  class="btn btn-primary"
+                  @click="startEditing(product)"
+              >
+                Edit
+              </button>
+            </template>
+          </td>
+        </tr>
+        </tbody>
+      </table>
 
     </div>
 
@@ -569,7 +571,8 @@ export default {
           </td>
           <td>
             <!-- Add any additional actions here -->
-            <button class="btn btn-danger btn-sm" @click="updateOrderStatus(order._id, this.orderStatuses.find(status => status._currentStatus === 'Cancelled')._id)">
+            <button class="btn btn-danger btn-sm"
+                    @click="updateOrderStatus(order._id, this.orderStatuses.find(status => status._currentStatus === 'Cancelled')._id)">
               Cancel Order
             </button>
           </td>
@@ -586,6 +589,7 @@ export default {
 body {
   background-color: #f8f9fa;
 }
+
 .section {
   padding: 10px;
   background-color: #f0f0f0;
