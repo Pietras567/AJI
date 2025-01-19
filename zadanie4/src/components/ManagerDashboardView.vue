@@ -42,7 +42,8 @@ export default {
     async fetchCategories() {
       try {
         const response = await axios.get('http://localhost:3000/categories');
-        response.data.forEach((element) => this.categories.push(element._name));
+        //response.data.forEach((element) => this.categories.push(element._name));
+        this.categories = response.data;
       } catch (error) {
         console.error('Error fetching categories: ', error);
       }
@@ -57,7 +58,12 @@ export default {
       try {
         const response = await axios.put(
             `http://localhost:3000/products/${this.editedProduct._id}`,
-            this.editedProduct
+            this.editedProduct, {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              withCredentials: true,
+            }
         );
         const updatedProduct = response.data;
 
@@ -347,8 +353,8 @@ export default {
               <div>Category: <!--{{ category }}--></div>
               <select v-model="category">
                 <option disabled value="">Please select one</option>
-                <option v-for="(item, key) in categories" :value="key">
-                  {{item}}
+                <option v-for="(item) in categories" :value="item._id">
+                  {{item._name}}
                 </option>
               </select>
 
@@ -515,10 +521,17 @@ export default {
         <select id="statusFilter" class="form-select" v-model="selectedStatus">
           <option value="">All statuses</option>
           <option
+<<<<<<< HEAD
               v-for="status in orderStatuses"
               :key="status"
               :value="status">
             {{ status._currentStatus }}
+=======
+              v-for="_status in orderStatuses"
+              :key="_status"
+              :value="_status">
+            {{ _status._currentStatus }}
+>>>>>>> origin/main
           </option>
         </select>
       </div>

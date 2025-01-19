@@ -588,7 +588,7 @@ app.get('/status', async (req: Request, res: Response) => {
 
 
 async function generateSeoDescription(productData: any) {
-    const apiKey = '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';
+    const apiKey = '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';
     const url = 'https://api.groq.com/openai/v1/chat/completions';
 
     const seoDescriptionPrompt = `
