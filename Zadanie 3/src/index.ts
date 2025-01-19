@@ -1018,6 +1018,61 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
 //     }
 // });
 
+app.get('/opinions/:id', async (req: Request, res: Response) => {
+    try {
+        const productId = req.params.id;
+
+        if (!productId) {
+            return res.status(400).json({ error: "Product ID is required" });
+        }
+
+        const opinionRepository = AppDataSource.getRepository(Opinion);
+        const productItemRepository = AppDataSource.getRepository(ProductItem);
+
+        const opinions = await opinionRepository.find({
+            relations: ["_order"]
+        });
+
+        console.log(opinions)
+
+        const returnOpinions = [];
+
+        for (const opinion of opinions) {
+            const id = opinion.order;
+
+            const items = await productItemRepository.find({
+                // @ts-ignore
+                where: { _order: id },
+            });
+
+            console.log(items)
+            for (const product of items) {
+                if (product.product.id === parseInt(productId)) {
+                    returnOpinions.push(opinion);
+                }
+            }
+        }
+
+        if (!returnOpinions || returnOpinions.length === 0) {
+            return res.status(404).json({ error: "No opinions found for this product" });
+        }
+
+        const opinionDetails = returnOpinions.map(opinion => ({
+            id: opinion.id,
+            content: opinion.content,
+            rating: opinion.rating,
+            orderId: opinion.order.id,
+            productId: productId,
+        }));
+
+        return res.status(200).json(opinionDetails);
+    } catch (error) {
+        console.error("Error fetching opinions:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// @ts-ignore
 app.get('/opinions', authenticateJWT(), async (req: Request, res: Response) => {
     try {
         const userId = res.locals.accountId;

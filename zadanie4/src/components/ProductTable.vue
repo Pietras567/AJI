@@ -15,6 +15,7 @@ export default {
       filterCategory: '',
       filterName: '',
       filteredProducts: [],
+      opinions: [],
     };
   },
   created() {
@@ -90,9 +91,21 @@ export default {
     toggleDescription(productId) {
       // Jeśli kliknięto ten sam produkt, zwinie się sekcja, w przeciwnym razie pokaże nową
       if (this.products.some(product => product._id === productId)) {
+        this.fetchOpinions(productId);
         this.expandedProductId = this.expandedProductId === productId ? null : productId;
+        console.log(this.opinions)
       } else {
         console.error('Product not found for the given ID:', productId);
+      }
+    },
+    async fetchOpinions(productId) {
+      try {
+        const response = await axios.get(`http://localhost:3000/opinions/${productId}`);
+        this.opinions = response.data;
+        console.log(response.data)
+      } catch (error) {
+        console.error("Error fetching opinions:", error);
+        this.opinions = [];
       }
     },
   },
@@ -183,6 +196,19 @@ export default {
           <!-- Rozwinięty opis -->
           <td v-if="expandedProductId === product._id" class="break-line bg-light">
             <p><strong>Description:</strong> {{ product._description }}</p>
+            <hr />
+            <!-- Wyświetlanie opinii -->
+            <div v-if="opinions && opinions.length > 0">
+              <h4>Opinions:</h4>
+              <div v-for="opinion in opinions" :key="opinion.id">
+                <p><strong>Rating:</strong> {{ opinion.rating }} / 5 ★</p>
+                <p><strong>Comment:</strong> {{ opinion.content }}</p>
+                <hr />
+              </div>
+            </div>
+            <div v-else>
+              <p>No opinions available for this product.</p>
+            </div>
           </td>
         </tr>
       </tbody>
