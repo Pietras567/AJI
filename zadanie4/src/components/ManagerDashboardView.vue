@@ -87,7 +87,12 @@ export default {
     async optimizeDescription(productId) {
       try {
         const response = await axios.get(
-            `http://localhost:3000/products/${productId}/seo-description`
+            `http://localhost:3000/products/${productId}/seo-description`, {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              withCredentials: true,
+            }
         );
         if (response.status === 200) {
 
@@ -136,7 +141,12 @@ export default {
         //   }
         // });
 
-        const response = await axios.post("http://localhost:3000/init", fileContent);
+        const response = await axios.post("http://localhost:3000/init", fileContent, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
 
         alert(response.data.message || "Database initialized successfully.");
       } catch (error) {
@@ -508,7 +518,7 @@ export default {
               v-for="status in orderStatuses"
               :key="status"
               :value="status">
-            {{ status }}
+            {{ status._currentStatus }}
           </option>
         </select>
       </div>

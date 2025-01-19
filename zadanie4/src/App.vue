@@ -125,4 +125,27 @@ body {
       radial-gradient(var(--_c)) 0 calc(var(--s)/2)/var(--s) var(--s) var(--c);
   background-attachment: fixed;
 }
+
+
+.navbar {
+  position: sticky;
+
+  width: 10%;
+}
+
+
+
+@media (max-width: 1000px) {
+  .navbar-collapse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+  }
+}
+
+
+
+
 </style>
