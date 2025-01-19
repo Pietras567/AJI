@@ -44,6 +44,7 @@ export default {
         const response = await axios.get('http://localhost:3000/categories');
         //response.data.forEach((element) => this.categories.push(element._name));
         this.categories = response.data;
+        console.log(this.categories)
       } catch (error) {
         console.error('Error fetching categories: ', error);
       }
@@ -451,14 +452,14 @@ export default {
           <template v-if="editedProduct && editedProduct._id === product._id">
             <select
                 class="form-select"
-                v-model="editedProduct._category._name"
+                v-model="editedProduct._category"
             >
               <option
-                  v-for="category in categories"
-                  :key="category"
-                  :value="category"
+                  v-for="_category in categories"
+                  :key="_category._id"
+                  :value="_category"
               >
-                {{ category }}
+                {{ _category._name }}
               </option>
             </select>
           </template>
