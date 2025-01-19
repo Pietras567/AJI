@@ -94,7 +94,12 @@ export default {
     async optimizeDescription(productId) {
       try {
         const response = await axios.get(
-            `http://localhost:3000/products/${productId}/seo-description`
+            `http://localhost:3000/products/${productId}/seo-description`, {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              withCredentials: true,
+            }
         );
         if (response.status === 200) {
 
@@ -143,7 +148,12 @@ export default {
         //   }
         // });
 
-        const response = await axios.post("http://localhost:3000/init", fileContent);
+        const response = await axios.post("http://localhost:3000/init", fileContent, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
 
         alert(response.data.message || "Database initialized successfully.");
       } catch (error) {
@@ -512,10 +522,17 @@ export default {
         <select id="statusFilter" class="form-select" v-model="selectedStatus">
           <option value="">All statuses</option>
           <option
+<<<<<<< HEAD
+              v-for="status in orderStatuses"
+              :key="status"
+              :value="status">
+            {{ status._currentStatus }}
+=======
               v-for="_status in orderStatuses"
               :key="_status"
               :value="_status">
             {{ _status._currentStatus }}
+>>>>>>> origin/main
           </option>
         </select>
       </div>
