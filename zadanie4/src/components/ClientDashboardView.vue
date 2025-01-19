@@ -8,7 +8,9 @@ export default {
       orders: [],
       opinions: [],
       orderStatuses: [],
+      filteredOrders: [],
       selectedStatus: '',
+      filterStatus: '',
       opinion: '',
       rating: 0,
       selectedOrderDate: "",
@@ -40,6 +42,8 @@ export default {
         console.log("fetchin orders for user:" + userId);
         const response = await axios.get(`http://localhost:3000/orders/clients/${userId}`);
         this.orders = await response.data;
+        this.filteredOrders = this.orders;
+
         console.log(this.orders);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -112,7 +116,38 @@ export default {
         alert("Failed to submit opinion. Please try again.");
       }
     },
+
+    filterOrders() {
+
+      this.filteredOrders = this.orders.filter(order => {
+
+        console.log("----------")
+        console.log(order);
+        console.log(this.filterStatus);
+        console.log("----------")
+
+
+        const matchesStat = this.filterStatus
+            ? order._status._currentStatus === this.filterStatus
+            : true;
+
+        return matchesStat;
+      });
+    },
+
   },
+
+
+
+
+  watch: {
+
+    filterStatus() {
+      this.filterOrders();
+    }
+
+  },
+
 };
 </script>
 
@@ -143,7 +178,7 @@ export default {
       <!-- Filter by Status -->
       <div class="mb-3">
         <label for="statusFilter" class="form-label">Filter by Status:</label>
-        <select id="statusFilter" class="form-select" v-model="selectedStatus">
+        <select id="statusFilter" class="form-select" v-model="filterStatus">
           <option value="">All statuses</option>
           <option v-for="status in orderStatuses" :key="status" :value="status">
             {{ status }}
@@ -163,7 +198,7 @@ export default {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="order in filterOrdersByStatus()" :key="order._id">
+        <tr v-for="order in filteredOrders" :key="order._id">
           <td>{{ order._id }}</td>
           <td>
             <ul>
