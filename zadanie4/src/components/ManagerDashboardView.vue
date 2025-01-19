@@ -522,17 +522,12 @@ export default {
         <select id="statusFilter" class="form-select" v-model="selectedStatus">
           <option value="">All statuses</option>
           <option
-<<<<<<< HEAD
-              v-for="status in orderStatuses"
-              :key="status"
-              :value="status">
-            {{ status._currentStatus }}
-=======
+
               v-for="_status in orderStatuses"
               :key="_status"
               :value="_status">
             {{ _status._currentStatus }}
->>>>>>> origin/main
+
           </option>
         </select>
       </div>
