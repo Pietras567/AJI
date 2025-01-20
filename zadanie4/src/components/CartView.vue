@@ -10,7 +10,6 @@ export default {
         address: "",
         postalCode: "",
         city: "",
-        phone: ""
       },
     };
   },
@@ -24,8 +23,7 @@ export default {
       return (
           this.deliveryInfo.address &&
           this.deliveryInfo.postalCode &&
-          this.deliveryInfo.city &&
-          this.deliveryInfo.phone
+          this.deliveryInfo.city
       );
     }
   },
