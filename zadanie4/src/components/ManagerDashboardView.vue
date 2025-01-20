@@ -150,19 +150,18 @@ export default {
           throw new Error("Invalid JSON format. Expecting an array of products.");
         }
 
-        // productData.forEach((product) => {
-        //   if (
-        //       !product._name ||
-        //       !product._description ||
-        //       product._price <= 0 ||
-        //       product._weight <= 0 ||
-        //       !product.categoryId
-        //   ) {
-        //     throw new Error(
-        //         "Each product must have a valid name, description, price, weight, and categoryId."
-        //     );
-        //   }
-        // });
+        productData.forEach((product) => {
+          if (
+              !product._name ||
+              !product._description ||
+              product._price <= 0 ||
+              product._weight <= 0
+          ) {
+            throw new Error(
+                "Each product must have a valid name, description, price, weight."
+            );
+          }
+        });
 
         const response = await axios.post("http://localhost:3000/init", fileContent, {
           headers: {
@@ -358,20 +357,20 @@ export default {
           <div v-if="isAddProductSectionVisible" class="section">
             Adding product form.
             <form>
-              <!--Name-->
-              <div>Name: <!--{{ productName }}--></div>
+
+              <div>Name: </div>
               <input v-model="productName" placeholder="Write name"/>
 
-              <!--Price-->
-              <p>Price: <!--{{ price }}--></p>
+
+              <p>Price: </p>
               <input v-model.number="price" placeholder="Write price"/>
 
-              <!--Weight-->
-              <p>Weight: <!--{{ weight }}--></p>
+
+              <p>Weight: </p>
               <input v-model.number="weight" placeholder="Write weight"/>
 
-              <!--Category-->
-              <div>Category: <!--{{ category }}--></div>
+
+              <div>Category: </div>
               <select v-model="category">
                 <option disabled value="">Please select one</option>
                 <option v-for="(item) in categories" :value="item._id">
@@ -379,9 +378,9 @@ export default {
                 </option>
               </select>
 
-              <!--Description-->
+
               <div>Description:</div>
-              <!--<div style="white-space: pre-line;">{{ description }}</div>-->
+
               <textarea v-model="description" placeholder="write description"></textarea>
 
               <div>
@@ -396,10 +395,6 @@ export default {
           <label for="file-upload" class="form-label">Upload Product JSON File:</label>
           <input type="file" id="file-upload" class="form-control" @change="handleFileUpload"/>
         </div>
-
-        <!--      <div v-if="validationError" class="text-danger mt-2">-->
-        <!--        <strong>Error:</strong> {{ validationError }}-->
-        <!--      </div>-->
 
         <button class="btn btn-primary mt-3" @click="initializeDatabase()">
           Initialize Database
@@ -516,7 +511,7 @@ export default {
           </td>
           <td>
             <template v-if="editedProduct && editedProduct._id === product._id">
-              <!--            <button class="btn btn-info btn-sm" @click="optimizeDescription(editedProduct)">Optimise description</button>/-->
+
               <button class="btn btn-success" @click="saveProduct">Save</button>
               <button class="btn btn-secondary" @click="cancelEditing">Cancel</button>
 
@@ -554,7 +549,7 @@ export default {
         </select>
       </div>
 
-      <!-- Orders Table -->
+
       <table class="table table-bordered">
         <thead>
         <tr>
@@ -563,6 +558,7 @@ export default {
           <th>Products</th>
           <th>Total Price</th>
           <th>Status</th>
+          <th>Order Date</th>
           <th>Actions</th>
         </tr>
         </thead>
@@ -588,7 +584,10 @@ export default {
                 {{ _status._currentStatus }}
               </option>
             </select>
+
           </td>
+         <td>{{ new Date(order._orderDate).toLocaleDateString('en-GB') }}</td>
+
           <td>
             <button class="btn btn-danger btn-sm"
                     @click="updateOrderStatus(order._id, this.orderStatuses.find(status => status._currentStatus === 'Cancelled')._id)">

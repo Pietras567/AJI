@@ -132,7 +132,7 @@ export default {
   <div class="container mt-5">
     <h1 class="my-4 text-center">Product list</h1>
 
-    <!-- Filtering Controls -->
+
     <div class="row mb-3">
       <div class="col-md-6">
         <label for="filter-name" class="form-label">Filter by Name:</label>
@@ -147,7 +147,7 @@ export default {
       </div>
     </div>
 
-    <!-- Sorting Controls -->
+
     <div class="row mb-3">
       <div class="col-md-6">
         <label for="sort-by" class="form-label">Sort by:</label>

@@ -6,12 +6,30 @@ export default {
     return {
       cart: [],
       orderStatuses: [],
+      deliveryInfo: {
+        address: "",
+        postalCode: "",
+        city: "",
+        phone: ""
+      },
     };
   },
   created() {
     this.finalizeCart();
     this.fetchOrderStatuses();
   },
+
+  computed: {
+    isFormValid() {
+      return (
+          this.deliveryInfo.address &&
+          this.deliveryInfo.postalCode &&
+          this.deliveryInfo.city &&
+          this.deliveryInfo.phone
+      );
+    }
+  },
+
   methods: {
     async fetchOrderStatuses() {
       try {
@@ -56,6 +74,16 @@ export default {
         console.error('Error loading cart: ', error);
       }
     },
+
+    validateAndSubmit() {
+      if (this.isFormValid) {
+        console.log("Form is valid. Proceeding to finalize order.");
+        this.finalizeOrder();
+      } else {
+        alert("Please fill in all required fields before proceeding.");
+      }
+    },
+
     async deleteProduct(productId) {
       console.log("Deleted: " + productId)
 
@@ -165,8 +193,53 @@ export default {
     </tr>
     </tbody>
   </table>
-  <button class="btn btn-primary" @click="finalizeOrder">Finalize order</button>
+  <div class="delivery-form mt-4">
+    <h2>Delivery Information</h2>
+    <form @submit.prevent="validateAndSubmit">
+      <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <input
+            type="text"
+            id="address"
+            class="form-control"
+            v-model="deliveryInfo.address"
+            placeholder="Enter your address"
+            required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="postalCode" class="form-label">Postal Code</label>
+        <input
+            type="text"
+            id="postalCode"
+            class="form-control"
+            v-model="deliveryInfo.postalCode"
+            placeholder="Enter your postal code"
+            required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="city" class="form-label">City</label>
+        <input
+            type="text"
+            id="city"
+            class="form-control"
+            v-model="deliveryInfo.city"
+            placeholder="Enter your city"
+            required
+        />
+      </div>
 
+    </form>
+  </div>
+
+  <button
+      class="btn btn-primary"
+      :disabled="!isFormValid"
+      @click="finalizeOrder"
+  >
+    Finalize Order
+  </button>
 </template>
 
 <style>

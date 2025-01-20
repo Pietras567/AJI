@@ -82,8 +82,9 @@ export default {
         return this.selectedStatus ? order.status === this.selectedStatus : true;
       });
     },
-    openOpinionModal(orderId) {
+    openOpinionModal(orderId, orderDate) {
       this.opinionOrderId = orderId;
+      this.selectedOrderDate = orderDate;
       this.opinion = '';
     },
     setRating(star) {
@@ -135,6 +136,12 @@ export default {
       });
     },
 
+    getOrderDate(orderId) {
+      const order = this.orders.find(o => o._id === orderId);
+      return order ? new Date(order._orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+    }
+
+
   },
 
 
@@ -175,7 +182,7 @@ export default {
     <div v-if="activeSection === 'orders'">
       <h2>Your Orders</h2>
 
-      <!-- Filter by Status -->
+
       <div class="mb-3">
         <label for="statusFilter" class="form-label">Filter by Status:</label>
         <select id="statusFilter" class="form-select" v-model="filterStatus">
@@ -186,7 +193,7 @@ export default {
         </select>
       </div>
 
-      <!-- Orders Table -->
+
       <table class="table table-bordered">
         <thead>
         <tr>
@@ -210,11 +217,10 @@ export default {
           <td>{{ order._totalPrice }} PLN</td>
           <td>{{ order._status._currentStatus }}</td>
           <td>
-            <!-- Opinion Button -->
             <button
                 v-if="['Executed', 'Cancelled'].includes(order._status._currentStatus) && !hasOpinion(order._id)"
                 class="btn btn-secondary btn-sm"
-                @click="openOpinionModal(order._id)"
+                @click="openOpinionModal(order._id, order._orderDate)"
             >
               Leave Opinion
             </button>
@@ -233,6 +239,7 @@ export default {
           <th>Content</th>
           <th>Rating</th>
           <th>Order ID</th>
+          <th>Order Date</th>
         </tr>
         </thead>
         <tbody>
@@ -241,13 +248,13 @@ export default {
           <td>{{ opinion.content }}</td>
           <td>{{ opinion.rating }}</td>
           <td>{{ opinion.orderId }}</td>
+          <td>{{ getOrderDate(opinion.orderId) }}</td>
         </tr>
         </tbody>
       </table>
     </div>
 
 
-    <!-- Opinion Modal -->
     <div v-if="opinionOrderId" class="modal d-block">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -256,13 +263,12 @@ export default {
             <button type="button" class="btn-close" @click="opinionOrderId = null"></button>
           </div>
           <div class="modal-body">
-            <!-- Display Order Date -->
+
             <div class="mb-3">
               <label class="form-label">Order Date:</label>
-              <p>{{ selectedOrderDate }}</p>
+              <p>{{  new Date(selectedOrderDate).toLocaleDateString('en-GB')  }}</p>
             </div>
 
-            <!-- Rating -->
             <div class="mb-3">
               <label class="form-label">Rating:</label>
               <div>
@@ -279,7 +285,6 @@ export default {
               </div>
             </div>
 
-            <!-- Opinion Text Area -->
             <textarea
                 v-model="opinion"
                 class="form-control"
