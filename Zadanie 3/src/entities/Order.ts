@@ -7,27 +7,27 @@ import { Opinion } from "./Opinion";
 
 @Entity("Orders")
 export class Order {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'id'})
   private _id!: number;
 
-  @Column("timestamp")
+  @Column("timestamp", {name: 'orderDate'})
   private _orderDate?: Date;
 
-  @ManyToOne(() => OrderStatus, { eager: true })
-  @JoinColumn({name: '_order_status_id'})
+  @ManyToOne(() => OrderStatus, {eager: true})
+  @JoinColumn({name: 'order_status_id'})
   private _status: OrderStatus;
 
-  @ManyToOne(() => User, { eager: true })
-  @JoinColumn({name: '_user_id'})
+  @ManyToOne(() => User, {eager: true})
+  @JoinColumn({name: 'user_id'})
   private _user: User;
 
-  @OneToMany(() => ProductItem, (item: ProductItem) => item.order, { cascade: true })
+  @OneToMany(() => ProductItem, (item: ProductItem) => item.order, {cascade: true})
   private _productList!: ProductItem[];
 
   @OneToMany(() => Opinion, (opinion) => opinion._order)
   private _opinions!: Opinion[];
 
-  @Column("float")
+  @Column("float", {name: 'totalPrice'})
   private _totalPrice: number;
 
   constructor(status: OrderStatus, user: User, totalPrice: number, orderDate?: Date) {

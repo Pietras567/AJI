@@ -5,18 +5,18 @@ import { Order } from "./Order";
 
 @Entity("ProductsItems")
 export class ProductItem {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: 'id'})
     _id!: number;
 
-    @Column("int")
+    @Column("int", {name: 'quantity'})
     private _quantity: number;
 
     @ManyToOne(() => Product, { eager: true })
-    @JoinColumn({name: '_product_id'})
+    @JoinColumn({name: 'productId'})
     private _product: Product;
 
     @ManyToOne(() => Order)
-    @JoinColumn({name: '_order_id'})
+    @JoinColumn({name: 'orderId'})
     private _order: Order;
 
 

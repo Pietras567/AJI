@@ -5,16 +5,16 @@ import {Opinion} from "./Opinion";
 
 @Entity("Accounts")
 export class Account {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: "id"})
     private _id!: number;
 
-    @Column({ unique: true, type: "varchar" })
+    @Column({name: "userName", unique: true, type: "varchar"})
     private _userName: string;
 
-    @Column("varchar")
+    @Column({name: "password", type: "varchar"})
     private _password: string;
 
-    @Column({ type: "varchar" })
+    @Column({name: "accountType", type: "varchar"})
     private _accountType: string;
 
     @OneToOne(() => User, (user) => user.account)

@@ -3,17 +3,17 @@ import { Order } from "./Order";
 
 @Entity("Opinions")
 export class Opinion {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: 'id'})
     private _id!: number;
 
-    @Column({ type: "int", width: 1 })
+    @Column({name: 'rating', type: "int", width: 1})
     private _rating: number; // Ocena (1-5)
 
-    @Column("text")
+    @Column({name: 'content', type: "text"})
     private _content: string; // Treść opinii
 
-    @ManyToOne(() => Order, (order) => order.opinions, { onDelete: "CASCADE" })
-    @JoinColumn({name: '_order_id'})
+    @ManyToOne(() => Order, (order) => order.opinions, {onDelete: "CASCADE"})
+    @JoinColumn({name: 'order_id'})
     _order: Order;
 
 

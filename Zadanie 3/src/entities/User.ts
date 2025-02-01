@@ -5,21 +5,20 @@ import {Order} from "./Order";
 
 @Entity("Users")
 export class User {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: 'id'})
     private _id!: number;
 
-    @Column("varchar")
+    @Column("varchar", {name: 'userName'})
     private _userName: string;
 
-    @Column("varchar")
+    @Column("varchar", {name: 'email'})
     private _email: string;
 
-    @Column("varchar")
+    @Column("varchar", {name: 'phone'})
     private _phone: string;
-
-
+    
     @OneToOne(() => Account, {onDelete: "CASCADE"})
-    @JoinColumn({name: '_account_id'})
+    @JoinColumn({name: 'accountId'})
     private _account: Account;
 
     constructor(userName: string, email: string, phone: string, account : Account) {

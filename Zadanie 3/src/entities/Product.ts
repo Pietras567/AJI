@@ -4,23 +4,23 @@ import { Category } from './Category'
 
 @Entity("Products")
 export class Product {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: 'id'})
     private _id!: number;
 
-    @Column("varchar")
+    @Column("varchar", {name: 'name'})
     private _name: string;
 
-    @Column("varchar")
+    @Column("varchar", {name: 'description'})
     private _description: string;
 
-    @Column("decimal", { precision: 10, scale: 2 })
+    @Column("decimal", {name: 'price', precision: 10, scale: 2})
     private _price: number;
 
-    @Column("float")
+    @Column("float", {name: 'weight'})
     private _weight: number;
 
-    @ManyToOne(() => Category, { eager: true })
-    @JoinColumn({name: '_category_id'})
+    @ManyToOne(() => Category, {eager: true})
+    @JoinColumn({name: 'categoryId'})
     private _category: Category;
 
     constructor(name: string, description: string, price: number, weight: number, category: Category) {

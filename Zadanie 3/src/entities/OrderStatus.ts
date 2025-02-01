@@ -6,16 +6,17 @@ import {Order} from "./Order";
 @Entity("OrderStatuses")
 
 export class OrderStatus {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: 'id'})
     private _id!: number;
 
     @Column({
+        name: 'currentStatus',
         type: "enum",
         enum: ["NotApproved", "Approved", "Cancelled", "Executed"],
     })
     private _currentStatus: string;
 
-    @OneToMany(() => Order, (item: Order) => item.status, { cascade: true })
+    @OneToMany(() => Order, (item: Order) => item.status, {cascade: true})
     private _orders!: Order[];
 
     constructor(currentStatus: string) {

@@ -5,10 +5,10 @@ import {Product} from "./Product";
 @Entity("Categories")
 
 export class Category {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: "id"})
     private _id!: number;
 
-    @Column("varchar")
+    @Column("varchar", {name: "name"})
     private _name: string;
 
     @OneToMany(() => Product, (item: Product) => item.category)
