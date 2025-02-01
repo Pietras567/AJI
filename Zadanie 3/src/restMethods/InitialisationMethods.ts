@@ -22,31 +22,31 @@ app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Respon
 
         // Proces inicjalizacji danych produktów
         for (let data of productData) {
-            const {_name, _description, _price, _weight, _category_id} = data;
+            const {name, description, price, weight, categoryId} = data;
 
             // Walidacja danych, jeśli jest to potrzebne
-            if (!_name || _name.trim() === "") {
+            if (!name || name.trim() === "") {
                 return res.status(400).json({error: "Product name cannot be empty."});
             }
-            if (!_description || _description.trim() === "") {
+            if (!description || description.trim() === "") {
                 return res.status(400).json({error: "Product description cannot be empty."});
             }
-            if (!_price || _price <= 0) {
+            if (!price || price <= 0) {
                 return res.status(400).json({error: "Product price must be greater than zero."});
             }
-            if (!_weight || _weight <= 0) {
+            if (!weight || weight <= 0) {
                 return res.status(400).json({error: "Product weight must be greater than zero."});
             }
 
             const categories = AppDataSource.getRepository(Category);
-            // @ts-ignore
-            const _category = await categories.findOne({where: {_id: _category_id}});
-            if (!_category) {
+
+            const category = await categories.findOne({where: {id: categoryId}});
+            if (!category) {
                 return res.status(404).json({error: "Category not found"});
             }
 
             // Tworzymy nowy produkt
-            const newProduct = new Product(_name, _description, _price, _weight, _category);
+            const newProduct = new Product(name, description, price, weight, category);
 
             // Zapisujemy produkt do bazy danych
             await AppDataSource.getRepository(Product).save(newProduct);
