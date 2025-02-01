@@ -1,4 +1,4 @@
-import {Request, Response} from 'express';
+import {NextFunction, Request, Response} from 'express';
 import {Category} from "../entities/Category";
 import {Product} from '../entities/Product';
 import "reflect-metadata";
@@ -9,7 +9,7 @@ import {authenticateJWT} from "../authenticationJWT";
 //D3
 //Inicjalizacja towarów w bazie danych na podstawie pliku.
 // @ts-ignore
-app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
+app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const productData = req.body; // Zawiera listę produktów (dane JSON)
 
@@ -22,7 +22,7 @@ app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Respon
 
         // Proces inicjalizacji danych produktów
         for (let data of productData) {
-            const {_name, _description, _price, _weight, categoryId} = data;
+            const {_name, _description, _price, _weight, _category_id} = data;
 
             // Walidacja danych, jeśli jest to potrzebne
             if (!_name || _name.trim() === "") {
@@ -40,10 +40,9 @@ app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Respon
 
             const categories = AppDataSource.getRepository(Category);
             // @ts-ignore
-            const _category = await categories.findOne({where: {_id: categoryId}});
+            const _category = await categories.findOne({where: {_id: _category_id}});
             if (!_category) {
-                res.status(404).send("Category not found");
-                return;
+                return res.status(404).json({error: "Category not found"});
             }
 
             // Tworzymy nowy produkt
@@ -55,7 +54,6 @@ app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Respon
 
         return res.status(200).json({message: "Products initialized."});
     } catch (error) {
-        // console.error("Error during product initialization:", error);
         return res.status(500).json({error: "Error occured."});
     }
 });

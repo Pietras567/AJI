@@ -13,7 +13,6 @@ import {authenticateJWT} from "../authenticationJWT";
 
 // @ts-ignore
 app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Request, res: Response) => {
-    // const { id } = req.params;
     const {rating, content} = req.body;
 
     if (!rating || rating < 1 || rating > 5) {
@@ -39,7 +38,7 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
 
         const userFromOrder = (await userRepository.findOne({
             // @ts-ignore
-            where: {_id: order._user.id},
+            where: {_id: order.user.id},
             relations: ["_account"],
         })) as User;
 
@@ -48,10 +47,7 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
             return res.status(404).json({error: "Order not found"});
         }
 
-        // @ts-ignore
-        console.log("Order: " + JSON.stringify(order, null, 2))
-
-        if (res.locals.accountId !== userFromOrder._account._id) {
+        if (res.locals.accountId !== userFromOrder.account.id) {
             return res.status(403).json({error: "You can only add opinions to your own orders"});
         }
 
@@ -63,7 +59,7 @@ app.post('/orders/:id/opinions', authenticateJWT(["CLIENT"]), async (req: Reques
 
         const existingOpinion = await opinionRepository.findOne({
             // @ts-ignore
-            where: { _order: { _id: order._id } },
+            where: { _order: { _id: order.id } },
         });
 
         if (existingOpinion) {

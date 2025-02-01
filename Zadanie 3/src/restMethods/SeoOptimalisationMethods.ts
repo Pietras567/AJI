@@ -70,7 +70,7 @@ Always respond in English.
 
 
 // @ts-ignore
-app.get('/products/:id/seo-description', async (req: Request, res: Response) => {
+app.get('/products/:id/seo-description', authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
     try {
         // Pobieramy produkt z bazy danych
 

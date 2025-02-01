@@ -103,7 +103,7 @@ app.post('/login', async (req: Request, res: Response) => {
         const accountRepository = AppDataSource.getRepository(Account);
 
         // @ts-ignore
-        const account = await accountRepository.findOne({where: {_username: username}});
+        const account = await accountRepository.findOne({where: {_userName: username}});
 
         if (!account || !(await account.validatePassword(password))) {
             return res.status(401).json({error: "Invalid username or password"});
@@ -111,7 +111,7 @@ app.post('/login', async (req: Request, res: Response) => {
 
 
         const token = jwt.sign(
-            {id: account.id, username: account.username, accountType: account.accountType},
+            {id: account.id, username: account.userName, accountType: account.accountType},
             secretKey,
             {expiresIn: expireTime}
         );
@@ -127,15 +127,9 @@ app.post('/login', async (req: Request, res: Response) => {
 
         const userRepository = AppDataSource.getRepository(User);
         // @ts-ignore
-        const user = await userRepository.findOne({where: {_userName: account._username}, relations: ['_account']})
+        const user = await userRepository.findOne({where: {_userName: account.userName}, relations: ['_account']})
         // @ts-ignore
-        console.log("id: " + user.id);
-        // @ts-ignore
-        console.log("username: " + user.userName);
-        // @ts-ignore
-        console.log("acc name: " + account._username);
-        // @ts-ignore
-        return res.status(200).json({'accountType': account._accountType , 'userId': user.id});
+        return res.status(200).json({'accountType': account.accountType , 'userId': user.id});
     } catch (error) {
         console.error("Error during login:", error);
         return res.status(500).send("Internal Server Error");
@@ -151,7 +145,7 @@ app.post('/register', async(req: Request, res: Response) => {
         const userRepository = AppDataSource.getRepository(User);
 
         // @ts-ignore
-        const account = await accountRepository.findOne({where: {_username: username}});
+        const account = await accountRepository.findOne({where: {_userName: username}});
         if(account) {
             res.status(409).send("User with this name arleady exists");
             return;
@@ -180,7 +174,7 @@ app.post('/register', async(req: Request, res: Response) => {
 
         let newAccount: Account = new Account(username, password, "CLIENT");
         await newAccount.hashPassword();
-        let newUser: User = new User(username,email,phone, newAccount);
+        let newUser: User = new User(username, email, phone, newAccount);
 
         accountRepository.save(newAccount);
         userRepository.save(newUser);
@@ -239,7 +233,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
         //     { expiresIn: process.env.JWT_EXPIRATION }
         // );
         const newToken = jwt.sign(
-            {id: account.id, username: account.username, accountType: account.accountType},
+            {id: account.id, username: account.userName, accountType: account.accountType},
             secretKey!,
             {expiresIn: expireTime}
         );

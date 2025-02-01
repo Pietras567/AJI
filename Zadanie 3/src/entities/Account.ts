@@ -9,7 +9,7 @@ export class Account {
     private _id!: number;
 
     @Column({ unique: true, type: "varchar" })
-    private _username: string;
+    private _userName: string;
 
     @Column("varchar")
     private _password: string;
@@ -18,11 +18,10 @@ export class Account {
     private _accountType: string;
 
     @OneToOne(() => User, (user) => user.account)
-    @JoinColumn({name: '_user_id'})
     private _user!: User;
 
-    constructor(username: string, password: string, accountType: "CLIENT" | "MANAGER") {
-        this._username = username;
+    constructor(userName: string, password: string, accountType: "CLIENT" | "MANAGER") {
+        this._userName = userName;
         this._password = password;
         this._accountType = accountType;
 
@@ -45,12 +44,12 @@ export class Account {
     }
 
 
-    get username(): string {
-        return this._username;
+    get userName(): string {
+        return this._userName;
     }
 
-    set username(value: string) {
-        this._username = value;
+    set userName(value: string) {
+        this._userName = value;
     }
 
     get password(): string {

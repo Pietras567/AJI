@@ -14,7 +14,7 @@ export class Order {
   private _orderDate?: Date;
 
   @ManyToOne(() => OrderStatus, { eager: true })
-  @JoinColumn({name: '_orderStatus_id'})
+  @JoinColumn({name: '_order_status_id'})
   private _status: OrderStatus;
 
   @ManyToOne(() => User, { eager: true })

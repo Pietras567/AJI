@@ -20,7 +20,7 @@ export class User {
 
     @OneToOne(() => Account, {onDelete: "CASCADE"})
     @JoinColumn({name: '_account_id'})
-    _account: Account;
+    private _account: Account;
 
     constructor(userName: string, email: string, phone: string, account : Account) {
         this._userName = userName;
