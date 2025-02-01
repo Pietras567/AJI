@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from "typeorm";
 import { Category } from './Category'
 
 
@@ -20,6 +20,7 @@ export class Product {
     private _weight: number;
 
     @ManyToOne(() => Category, { eager: true })
+    @JoinColumn({name: '_category_id'})
     private _category: Category;
 
     constructor(name: string, description: string, price: number, weight: number, category: Category) {

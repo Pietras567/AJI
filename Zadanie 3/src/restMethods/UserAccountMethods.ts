@@ -111,7 +111,7 @@ app.post('/login', async (req: Request, res: Response) => {
 
 
         const token = jwt.sign(
-            {id: account._id, username: account._username, accountType: account._accountType},
+            {id: account.id, username: account.username, accountType: account.accountType},
             secretKey,
             {expiresIn: expireTime}
         );
@@ -150,6 +150,7 @@ app.post('/register', async(req: Request, res: Response) => {
         const accountRepository = AppDataSource.getRepository(Account);
         const userRepository = AppDataSource.getRepository(User);
 
+        // @ts-ignore
         const account = await accountRepository.findOne({where: {_username: username}});
         if(account) {
             res.status(409).send("User with this name arleady exists");
@@ -215,6 +216,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
         const decoded = jwt.decode(token) as { id: number; username: string; accountType: string; exp: number };
         // Pobranie użytkownika z bazy danych
         const accountRepository = AppDataSource.getRepository(Account);
+        // @ts-ignore
         const account = await accountRepository.findOne({where: {_id: decoded.id}});
 
         if (!account) {
@@ -237,7 +239,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
         //     { expiresIn: process.env.JWT_EXPIRATION }
         // );
         const newToken = jwt.sign(
-            {id: account._id, username: account._username, accountType: account._accountType},
+            {id: account.id, username: account.username, accountType: account.accountType},
             secretKey!,
             {expiresIn: expireTime}
         );

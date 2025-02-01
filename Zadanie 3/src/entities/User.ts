@@ -18,8 +18,8 @@ export class User {
     private _phone: string;
 
 
-    @ManyToOne(() => Account, (account) => account.users, { onDelete: "CASCADE" })
-    @JoinColumn({ name: '_account_id' })
+    @OneToOne(() => Account, {onDelete: "CASCADE"})
+    @JoinColumn({name: '_account_id'})
     _account: Account;
 
     constructor(userName: string, email: string, phone: string, account : Account) {

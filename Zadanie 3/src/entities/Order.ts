@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, OneToOne, JoinColumn} from "typeorm";
 import {OrderStatus} from "./OrderStatus"
 import {Product} from "./Product"
 import {ProductItem} from "./ProductItem";
@@ -14,9 +14,11 @@ export class Order {
   private _orderDate?: Date;
 
   @ManyToOne(() => OrderStatus, { eager: true })
+  @JoinColumn({name: '_orderStatus_id'})
   private _status: OrderStatus;
 
   @ManyToOne(() => User, { eager: true })
+  @JoinColumn({name: '_user_id'})
   private _user: User;
 
   @OneToMany(() => ProductItem, (item: ProductItem) => item.order, { cascade: true })

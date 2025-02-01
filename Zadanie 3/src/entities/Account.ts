@@ -6,20 +6,20 @@ import {Opinion} from "./Opinion";
 @Entity("Accounts")
 export class Account {
     @PrimaryGeneratedColumn()
-    _id!: number;
+    private _id!: number;
 
     @Column({ unique: true, type: "varchar" })
-    _username: string;
+    private _username: string;
 
     @Column("varchar")
-    _password: string;
+    private _password: string;
 
     @Column({ type: "varchar" })
-    _accountType: string;
+    private _accountType: string;
 
-
-    @OneToMany(() => User, (user) => user.account)
-    private _users!: User[];
+    @OneToOne(() => User, (user) => user.account)
+    @JoinColumn({name: '_user_id'})
+    private _user!: User;
 
     constructor(username: string, password: string, accountType: "CLIENT" | "MANAGER") {
         this._username = username;
@@ -28,12 +28,12 @@ export class Account {
 
     }
 
-    get users(): User[] {
-        return this._users;
+    get user(): User {
+        return this._user;
     }
 
-    set users(value: User[]) {
-        this._users = value;
+    set user(value: User) {
+        this._user = value;
     }
 
     async hashPassword() {
@@ -42,5 +42,34 @@ export class Account {
 
     async validatePassword(plainPassword: string): Promise<boolean> {
         return await bcrypt.compare(plainPassword, this._password);
+    }
+
+
+    get username(): string {
+        return this._username;
+    }
+
+    set username(value: string) {
+        this._username = value;
+    }
+
+    get password(): string {
+        return this._password;
+    }
+
+    set password(value: string) {
+        this._password = value;
+    }
+
+    get accountType(): string {
+        return this._accountType;
+    }
+
+    set accountType(value: string) {
+        this._accountType = value;
+    }
+
+    get id(): number {
+        return this._id;
     }
 }

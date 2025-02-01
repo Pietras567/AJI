@@ -34,7 +34,6 @@ export default {
       document.cookie = 'type=; Max-Age=0';
       document.cookie = 'id=; Max-Age=0';
       this.$router.push('/authentication');
-      print("kliknieto logout");
     },
   }, mounted() {
 

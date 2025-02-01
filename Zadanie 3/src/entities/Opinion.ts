@@ -13,6 +13,7 @@ export class Opinion {
     private _content: string; // Treść opinii
 
     @ManyToOne(() => Order, (order) => order.opinions, { onDelete: "CASCADE" })
+    @JoinColumn({name: '_order_id'})
     _order: Order;
 
 
