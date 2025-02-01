@@ -1,5 +1,3 @@
-import express from 'express';
-import bodyParser from 'body-parser';
 import {DataSource} from "typeorm";
 import {ProductItem} from "./entities/ProductItem";
 import {Category} from "./entities/Category";
@@ -11,8 +9,6 @@ import "reflect-metadata";
 import {Opinion} from "./entities/Opinion";
 import {Account} from "./entities/Account";
 import * as dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import cors from 'cors';
 import {app} from "./app"
 import "./restMethods/CategoryMethods";
 import "./restMethods/InitialisationMethods";
