@@ -7,13 +7,13 @@
       <div class="card-body">
         <form ref="form" @submit.prevent="isRegister ? register() : login()">
           <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
+            <label for="userName" class="form-label">Username</label>
             <input
-                v-model="username"
+                v-model="userName"
                 type="text"
                 class="form-control"
-                id="username"
-                placeholder="Enter username"
+                id="userName"
+                placeholder="Enter userName"
                 required
             />
           </div>
@@ -98,7 +98,7 @@ export default {
       phoneNumberError: "",
       email: "",
       emailError: "",
-      username: "",
+      userName: "",
       password: "",
       phoneNumber: "",
       confirmPassword: "",
@@ -141,10 +141,10 @@ export default {
     },
 
     async login() {
-      const {username} = this;
+      const {userName} = this;
 
 
-      let data = {'username': this.username, 'password': this.password};
+      let data = {'userName': this.userName, 'password': this.password};
 
       try {
         const response = await axios.post('http://localhost:3000/login', data,
@@ -161,7 +161,7 @@ export default {
         this.$router.push('/');
       } catch (error) {
         console.error("Login failed:", error.response?.data?.error || error.message);
-        this.errorMessage = "Invalid username or password"; // Display the error to the user
+        this.errorMessage = "Invalid userName or password"; // Display the error to the user
       }
 
     },
@@ -182,7 +182,7 @@ export default {
         this.errorMessage = "";
 
         let data = {
-          'username': this.username,
+          'userName': this.userName,
           'password': this.password,
           'email': this.email,
           'phone': this.phoneNumber.replace(/\s+/g, '')

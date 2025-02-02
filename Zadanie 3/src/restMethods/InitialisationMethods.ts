@@ -40,7 +40,8 @@ app.post("/init", authenticateJWT(["MANAGER"]), async (req: Request, res: Respon
 
             const categories = AppDataSource.getRepository(Category);
 
-            const category = await categories.findOne({where: {id: categoryId}});
+            // @ts-ignore
+            const category = await categories.findOne({where: {_id: categoryId}});
             if (!category) {
                 return res.status(404).json({error: "Category not found"});
             }

@@ -9,6 +9,10 @@ import jwt from "jsonwebtoken";
 import {AppDataSource} from "../index";
 import {app} from "../app";
 import {authenticateJWT} from "../authenticationJWT";
+import * as dotenv from "dotenv";
+
+require('dotenv').config({path: './secret.env'});
+dotenv.config();
 
 // @ts-ignore
 app.post('/users', authenticateJWT(["MANAGER"]), async (req: Request, res: Response) => {
@@ -18,15 +22,15 @@ app.post('/users', authenticateJWT(["MANAGER"]), async (req: Request, res: Respo
 
         if (!userName || userName.trim() === "") {
             res.status(400).json({error: "User name cannot be empty."});
-            return
+            return;
         }
         if (!email || !/\S+@\S+\.\S+/.test(email)) {
             res.status(400).json({error: "Invalid email address."});
-            return
+            return;
         }
         if (!phone || !/^\d{9}$/.test(phone)) {
             res.status(400).json({error: "Phone number must contain exactly 9 digits."});
-            return
+            return;
         }
 
     } catch (error) {
@@ -92,10 +96,13 @@ async function createAccounts() {
 
 // @ts-ignore
 app.post('/login', async (req: Request, res: Response) => {
-    const {username, password} = req.body;
+    const {userName, password} = req.body;
 
-    const secretKey = "213742069"
-    const expireTime = "1h"
+    const secretKey: string = process.env.JWT_SECRET!;
+    const expireTime: string = process.env.JWT_EXPIRATION!;
+
+    //const secretKey = "213742069"
+    //const expireTime = "1h"
 
 
     try {
@@ -103,15 +110,16 @@ app.post('/login', async (req: Request, res: Response) => {
         const accountRepository = AppDataSource.getRepository(Account);
 
         // @ts-ignore
-        const account = await accountRepository.findOne({where: {_userName: username}});
+        const account = await accountRepository.findOne({where: {_userName: userName}});
 
         if (!account || !(await account.validatePassword(password))) {
             return res.status(401).json({error: "Invalid username or password"});
         }
 
 
+        // @ts-ignore
         const token = jwt.sign(
-            {id: account.id, username: account.userName, accountType: account.accountType},
+            {id: account.id, userName: account.userName, accountType: account.accountType},
             secretKey,
             {expiresIn: expireTime}
         );
@@ -128,8 +136,9 @@ app.post('/login', async (req: Request, res: Response) => {
         const userRepository = AppDataSource.getRepository(User);
         // @ts-ignore
         const user = await userRepository.findOne({where: {_userName: account.userName}, relations: ['_account']})
-        // @ts-ignore
-        return res.status(200).json({'accountType': account.accountType , 'userId': user.id});
+        if (user != null) {
+            return res.status(200).json({'accountType': account.accountType , 'userId': user.id});
+        }
     } catch (error) {
         console.error("Error during login:", error);
         return res.status(500).send("Internal Server Error");
@@ -138,21 +147,21 @@ app.post('/login', async (req: Request, res: Response) => {
 
 
 app.post('/register', async(req: Request, res: Response) => {
-    const {username, password, email, phone} = req.body;
+    const {userName, password, email, phone} = req.body;
 
     try {
         const accountRepository = AppDataSource.getRepository(Account);
         const userRepository = AppDataSource.getRepository(User);
 
         // @ts-ignore
-        const account = await accountRepository.findOne({where: {_userName: username}});
+        const account = await accountRepository.findOne({where: {_userName: userName}});
         if(account) {
             res.status(409).send("User with this name arleady exists");
             return;
         }
 
         // @ts-ignore
-        const user = await userRepository.findOne({where: {_userName: username}});
+        const user = await userRepository.findOne({where: {_userName: userName}});
         if(user) {
             res.status(409).send("User with this name arleady exists");
             return;
@@ -172,12 +181,12 @@ app.post('/register', async(req: Request, res: Response) => {
             return;
         }
 
-        let newAccount: Account = new Account(username, password, "CLIENT");
+        let newAccount: Account = new Account(userName, password, "CLIENT");
         await newAccount.hashPassword();
-        let newUser: User = new User(username, email, phone, newAccount);
+        let newUser: User = new User(userName, email, phone, newAccount);
 
-        accountRepository.save(newAccount);
-        userRepository.save(newUser);
+        await accountRepository.save(newAccount);
+        await userRepository.save(newUser);
 
         res.status(200).send("Account created");
     } catch (error) {
@@ -207,7 +216,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
         // jwt.verify(token, secretKey, { ignoreExpiration: true });
 
 
-        const decoded = jwt.decode(token) as { id: number; username: string; accountType: string; exp: number };
+        const decoded = jwt.decode(token) as { id: number; userName: string; accountType: string; exp: number };
         // Pobranie użytkownika z bazy danych
         const accountRepository = AppDataSource.getRepository(Account);
         // @ts-ignore
@@ -233,7 +242,7 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
         //     { expiresIn: process.env.JWT_EXPIRATION }
         // );
         const newToken = jwt.sign(
-            {id: account.id, username: account.userName, accountType: account.accountType},
+            {id: account.id, userName: account.userName, accountType: account.accountType},
             secretKey!,
             {expiresIn: expireTime}
         );

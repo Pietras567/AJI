@@ -8,7 +8,6 @@ import {User} from "./entities/User"
 import "reflect-metadata";
 import {Opinion} from "./entities/Opinion";
 import {Account} from "./entities/Account";
-import * as dotenv from "dotenv";
 import {app} from "./app"
 import "./restMethods/CategoryMethods";
 import "./restMethods/InitialisationMethods";
@@ -19,8 +18,6 @@ import "./restMethods/SeoOptimalisationMethods";
 import "./restMethods/StatusMethods";
 import "./restMethods/UserAccountMethods";
 
-require('dotenv').config({path: './secret.env'});
-dotenv.config();
 
 export const AppDataSource = new DataSource({
     type: "postgres",

@@ -2,6 +2,10 @@ import {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import {AppDataSource} from "./index";
 import {Account} from "./entities/Account";
+import * as dotenv from "dotenv";
+
+require('dotenv').config({path: './secret.env'});
+dotenv.config();
 
 export const authenticateJWT = (allowedRoles?: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -22,8 +26,12 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
 
         try {
 
-            const secretKey = "213742069"
-            const expireTime = "1h"
+
+            const secretKey = process.env.JWT_SECRET!;
+            const expireTime = process.env.JWT_EXPIRATION!;
+
+            //const secretKey = "213742069"
+            //const expireTime = "1h"
 
             // Weryfikacja tokenu
             // const decoded  = jwt.verify(token, process.env.JWT_SECRET!);
@@ -33,7 +41,7 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
 
             type JwtPayload = {
                 id: number;
-                username: string;
+                userName: string;
                 accountType: string;
                 iat?: number;
                 exp?: number;
@@ -60,7 +68,7 @@ export const authenticateJWT = (allowedRoles?: string[]) => {
 
             if (allowedRoles != null) {
                 // Jeśli sprawdzamy rolę, sprawdzamy, czy użytkownik ma odpowiednią rolę
-                if (allowedRoles && !allowedRoles.includes(account._accountType)) {
+                if (allowedRoles && !allowedRoles.includes(account.accountType)) {
                     return res.status(403).json({error: "Forbidden: Insufficient permissions"});
                 }
             }
