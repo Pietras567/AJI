@@ -39,71 +39,12 @@ app.post('/users', authenticateJWT(["MANAGER"]), async (req: Request, res: Respo
     }
 });
 
-//D2
-// Uwierzytelnianie do aplikacji
-
-async function createAccounts() {
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(5000);
-
-    const accountRepository = AppDataSource.getRepository(Account);
-    const userRepository = AppDataSource.getRepository(User);
-    const orderRepository = AppDataSource.getRepository(Order);
-    const productRepository = AppDataSource.getRepository(Product);
-    const statusRepository = AppDataSource.getRepository(OrderStatus);
-// Tworzymy konto "CLIENT"
-    const clientAccount = new Account("sigmaManager", "haselko321", "MANAGER");
-    await clientAccount.hashPassword();
-    await accountRepository.save(clientAccount);
-//
-// // Tworzymy użytkownika przypisanego do konta "CLIENT"
-//     const clientUser = new User("mala sigiemka", "sigma@example.pl", "123456789", clientAccount);
-//     await userRepository.save(clientUser);
-
-    // Get a product
-    // const product2 = await productRepository.findOne({
-    //     // @ts-ignore
-    //     where: {_id: 1},
-    // });
-
-//     const user123 = await userRepository.findOne({
-//         // @ts-ignore
-//         where: {_id: 4},
-//     }) as User;
-//     ;
-//
-//     const status123 = await statusRepository.findOne({
-//         // @ts-ignore
-//         where: {_id: 2},
-//     }) as OrderStatus;
-//
-// // Create an order
-//
-//
-//     const order = new Order(status123, user123, new Date());
-//
-//     // Create product item
-//     const productItem = new ProductItem(product2!, 2, order);
-//
-//     order.productList = [productItem];
-//
-//     await orderRepository.save(order);
-//     console.log("Order saved:", order);
-//
-
-}
-
-
 // @ts-ignore
 app.post('/login', async (req: Request, res: Response) => {
     const {userName, password} = req.body;
 
     const secretKey: string = process.env.JWT_SECRET!;
     const expireTime: string = process.env.JWT_EXPIRATION!;
-
-    //const secretKey = "213742069"
-    //const expireTime = "1h"
-
 
     try {
 
@@ -116,14 +57,12 @@ app.post('/login', async (req: Request, res: Response) => {
             return res.status(401).json({error: "Invalid username or password"});
         }
 
-
         // @ts-ignore
         const token = jwt.sign(
             {id: account.id, userName: account.userName, accountType: account.accountType},
             secretKey,
             {expiresIn: expireTime}
         );
-
 
         res.cookie("authToken", token, {
             httpOnly: true,
@@ -144,7 +83,6 @@ app.post('/login', async (req: Request, res: Response) => {
         return res.status(500).send("Internal Server Error");
     }
 });
-
 
 app.post('/register', async(req: Request, res: Response) => {
     const {userName, password, email, phone} = req.body;
@@ -210,11 +148,8 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
     const token = authHeader.split(" ")[1];
 
     try {
-
-
         // jwt.verify(token, process.env.JWT_SECRET!, { ignoreExpiration: true });
         // jwt.verify(token, secretKey, { ignoreExpiration: true });
-
 
         const decoded = jwt.decode(token) as { id: number; userName: string; accountType: string; exp: number };
         // Pobranie użytkownika z bazy danych
@@ -234,7 +169,6 @@ app.post("/refresh-token", async (req: Request, res: Response) => {
             // Jeśli do wygaśnięcia zostało więcej niż 30 minut, odrzuć żądanie
             return res.status(400).json({message: "Token is not close to expiring"});
         }
-
 
         // const newToken = jwt.sign(
         //     { id: account._id, username: account._username, accountType: account._accountType },
