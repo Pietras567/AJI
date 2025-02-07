@@ -1,0 +1,322 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #87CEEB;
+    overflow: hidden;
+}
+
+.car_position_changer[data-attribute=car1] {
+   animation: moveCar1 11s linear infinite;
+}
+
+.car_position_changer[data-attribute=car2] {
+   animation: moveCar2 11s linear infinite;
+}
+
+.car_position_changer[data-attribute=car3] {
+   animation: moveCar3 11s linear infinite;
+}
+
+@keyframes moveCar1 {
+    0% {
+        translate: 0px -50px;
+        transform: translate(-3000px);
+    }
+    100% {
+        translate: 0px -50px;
+        transform: translate(3000px);
+    }
+}
+
+@keyframes moveCar2 {
+    0% {
+        translate: -800px 150px;
+        transform: translate(-3000px);
+    }
+    100% {
+        translate: -800px 150px;
+        transform: translate(3000px);
+    }
+}
+
+
+@keyframes moveCar3 {
+    0% {
+        translate: -1400px 0px;
+        transform: translate(-3000px);
+    }
+    100% {
+        translate: -1400px 0px;
+        transform: translate(3000px);
+    }
+}
+
+.sun {
+    background: yellow;
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    left: 96%;
+    top: -3%;
+    border-radius: 100%;
+}
+
+.sun::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,0,0.3), rgba(255,255,0,0));
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+.cloud {
+    position: absolute;
+    background: #fff;
+}
+
+.cloud1 {
+    top: 20px;
+    left: 10%;
+    width: 120px;
+    height: 70px;
+    border-radius: 60% 40% 60% 40%;
+    box-shadow: -30px 30px 0 -10px #fff, 30px 30px 0 -10px #fff, -60px 20px 0 -10px #fff;
+    animation: moveClouds 50s linear infinite;
+}
+
+.cloud2 {
+    top: 60px;
+    left: 40%;
+    width: 150px;
+    height: 80px;
+    border-radius: 50% 50% 40% 60%;
+    box-shadow: -40px 40px 0 -15px #fff, 40px 40px 0 -15px #fff, -50px 20px 0 -15px #fff;
+    animation: moveClouds 65s linear infinite;
+}
+
+.cloud3 {
+    top: 10px;
+    left: 70%;
+    width: 100px;
+    height: 60px;
+    border-radius: 30% 70% 60% 40%;
+    box-shadow: -25px 25px 0 -10px #fff, 25px 25px 0 -10px #fff, -40px 15px 0 -10px #fff;
+    animation: moveClouds 70s linear infinite;
+}
+
+.cloud4 {
+    top: 30px;
+    left: 75%;
+    width: 130px;
+    height: 90px;
+    border-radius: 70% 30% 50% 50%;
+    box-shadow: -35px 35px 0 -12px #fff, 35px 35px 0 -12px #fff, -55px 25px 0 -12px #fff;
+    animation: moveClouds 60s linear infinite;
+}
+
+.cloud5 {
+    top: 50px;
+    left: 20%;
+    width: 110px;
+    height: 70px;
+    border-radius: 40% 60% 50% 50%;
+    box-shadow: -25px 25px 0 -10px #fff, 25px 25px 0 -10px #fff, -45px 20px 0 -10px #fff;
+    animation: moveClouds 45s linear infinite;
+}
+
+
+
+@keyframes moveClouds {
+    0% {
+        left: -10%;
+    }
+    100% {
+        left: 120%;
+    }
+}
+
+.road {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 35%;
+    background-color: #505050;
+}
+
+.line {
+    position: absolute;
+    bottom: 50%;
+    width: 100%;
+    height: 5%;
+    background: repeating-linear-gradient(
+        to right,
+        transparent 0,
+        transparent 40px,
+        white 40px,
+        white 100px
+    );
+}
+
+.core {
+    position: absolute;
+    bottom: 65%;
+    left: 45%;
+    width: 10%;
+    height: 40%;
+    background-color: rgb(20, 20, 190);
+    border-radius: 0px 15px 0px 0px;
+}
+
+.car_window_left {
+    position: absolute;
+    bottom: 45%;
+    left: 5%;
+    width: 40%;
+    height: 45%;
+    background-color: #06b3df;
+    border-radius: 10px;
+}
+
+.car_window_right {
+    position: absolute;
+    bottom: 45%;
+    left: 55%;
+    width: 40%;
+    height: 45%;
+    background-color: #06b3df;
+    border-radius: 10px;
+}
+
+.wheel {
+    position: absolute;
+    bottom: -20px;
+    width: 40px;
+    height: 40px;
+    background-color: black;
+    border-radius: 50%;
+}
+
+.wheel::before {
+    content: '';
+    position: absolute;
+    top: 7.5px;
+    left: 7.5px;
+    width: 25px;
+    height: 25px;
+    background-color: grey;
+    border-radius: 50%;
+}
+
+.wheel.left {
+    left: 10px;
+}
+
+.wheel.right {
+    right: 10px;
+}
+
+.handle_left {
+    position: absolute;
+    bottom: 30%;
+    left: 30%;
+    width: 10%;
+    height: 10%;
+    background-color: #1f1d1d;
+    border-radius: 10px;
+}
+
+.handle_right {
+    position: absolute;
+    bottom: 30%;
+    left: 80%;
+    width: 10%;
+    height: 10%;
+    background-color: #1f1d1d;
+    border-radius: 10px;
+}
+
+.front {
+    position: absolute;
+    bottom: 65%;
+    left: 54.9%;
+    width: 5%;
+    height: 25%;
+    background-color: rgb(20, 20, 190);
+    border-radius: 0px 50px 20px 0px;
+}
+
+.front_window {
+    position: absolute;
+    top: -65%;
+    left: -2%;
+    width: 50%;
+    height: 65%;
+    background-color: #06b3df;
+    border-radius: 0px 150px 0px 15px;
+}
+
+.back {
+    position: absolute;
+    bottom: 65%;
+    left: 41.1%;
+    width: 4%;
+    height: 46%;
+    background-color: rgb(20, 20, 190);
+    border-radius: 90px 0px 0px 40px;
+}
+
+.back_window {
+    position: absolute;
+    bottom: 35%;
+    left: 20%;
+    width: 65%;
+    height: 55%;
+    background-color: #06b3df;
+    border-radius: 90px 30px 30px 30px;
+}
+
+.roof {
+    position:absolute;
+    bottom: 95%;
+    left: 44%;
+    width: 11%;
+    height: 16%;
+    background-color: rgb(20, 20, 190);
+    border-radius: 15px 30px 0px 0px;
+}
+
+.front_light {
+    position: absolute;
+    bottom: 30%;
+    left: 45%;
+    width: 40%;
+    height: 20%;
+    background-color: yellow;
+    border-radius: 10px;
+}
+
+.back_light {
+    position: absolute;
+    bottom: 12%;
+    left: 15%;
+    width: 35%;
+    height: 15%;
+    background-color: red;
+    border-radius: 10px;
+}
+
+.grass {
+    position: absolute;
+    background: #22c214;
+    border-radius: 50%;
+    width: 140%;
+    height: 120%;
+    box-shadow: -900px 500px 0 300px #22c214, -200px 300px 0 300px #22c214;
+    top: 20%;
+    left: 10%;
+}
