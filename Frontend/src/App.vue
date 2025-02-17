@@ -72,17 +72,17 @@ export default {
   <div class="features-container container my-5">
     <div class="row text-center">
       <div class="col-md-4">
-        <img src="@/assets/quality.png" alt="Quality" width="100" height="100" class="mb-3"/>
+        <img src="@/assets/quality.svg" alt="Quality" width="100" height="100" class="mb-3"/>
         <h5>Top Quality</h5>
         <p>We offer products of the highest quality to meet your needs.</p>
       </div>
       <div class="col-md-4">
-        <img src="@/assets/delivery.png" alt="Delivery" width="173" height="100" class="mb-3"/>
+        <img src="@/assets/delivery.svg" alt="Delivery" width="173" height="100" class="mb-3"/>
         <h5>Fast Delivery</h5>
         <p>Enjoy fast and reliable delivery for all your orders.</p>
       </div>
       <div class="col-md-4">
-        <img src="@/assets/support.png" alt="Support" width="100" height="100" class="mb-3"/>
+        <img src="@/assets/support.svg" alt="Support" width="100" height="100" class="mb-3"/>
         <h5>24/7 Support</h5>
         <p>Our team is available round the clock to assist you.</p>
       </div>

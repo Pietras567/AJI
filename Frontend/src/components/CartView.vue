@@ -186,7 +186,7 @@ export default {
         <input id="change-quantity" type="number" class="form-control w-50" v-model.number="product.quantity" min="1" @input="updateQuantity(product.id, product.quantity)"/>
       </td>
       <td>
-        <img src="@/assets/delete.png" alt="Delete" width="32px" @click="deleteProduct(product.id)" class="align-bottom">
+        <img src="@/assets/delete.svg" alt="Delete" width="32px" @click="deleteProduct(product.id)" class="align-bottom">
       </td>
     </tr>
     </tbody>
