@@ -1,7 +1,12 @@
 <script>
 import axios from 'axios';
+import { useCartStore } from '@/stores/cartStore'
 
 export default {
+  setup() {
+    const cartStore = useCartStore()
+    return { cartStore }
+  },
   data() {
     return {
       products: [],
@@ -40,17 +45,7 @@ export default {
         alert('Quantity must be greater than 0');
         return;
       }
-
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const existingProduct = cart.find(item => item.id === this.selectedProductId);
-
-      if (existingProduct) {
-        existingProduct.quantity += this.quantity;
-      } else {
-        cart.push({ id: this.selectedProductId, quantity: this.quantity });
-      }
-
-      localStorage.setItem('cart', JSON.stringify(cart));
+      this.cartStore.addToCart(this.selectedProductId, this.quantity)
       this.closePopup();
       alert('Product added to cart successfully!');
     },

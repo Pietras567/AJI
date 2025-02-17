@@ -1,16 +1,13 @@
 <script>
 import axios from "axios";
+import { useCartStore } from '@/stores/cartStore'
+import { mapState, mapActions } from 'pinia'
 
 export default {
   data() {
     return {
       cart: [],
       orderStatuses: [],
-      deliveryInfo: {
-        address: "",
-        postalCode: "",
-        city: "",
-      },
     };
   },
   created() {
@@ -19,6 +16,7 @@ export default {
   },
 
   computed: {
+    ...mapState(useCartStore, ['items', 'deliveryInfo']),
     isFormValid() {
       return (
           this.deliveryInfo.address &&
@@ -29,6 +27,13 @@ export default {
   },
 
   methods: {
+    ...mapActions(useCartStore, [
+      'removeFromCart',
+      'updateQuantity',
+      'finalizeOrder',
+      'clearCart'
+    ]),
+
     async fetchOrderStatuses() {
       try {
         const response = await axios.get("http://localhost:3000/status");
@@ -40,12 +45,14 @@ export default {
         console.error("Error fetching statuses:", error);
       }
     },
+
     setCookie(name, value, hours) {
       const d = new Date();
       d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
       const expires = "expires=" + d.toUTCString();
       document.cookie = name + "=" + value + ";" + expires + ";path=/";
     },
+
     getCookie(name) {
       const nameEQ = name + "=";
       const ca = document.cookie.split(';');
@@ -57,10 +64,12 @@ export default {
       }
       return null;
     },
+
     async finalizeCart() {
       try {
-        console.log("cart hello world");
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const cart = useCartStore().cartItems;
+        console.log(cart);
+
         for (const element of cart) {
           console.log("id: "  + element.id + ", quantity: " + element.quantity)
           const response = await axios.get(`http://localhost:3000/products/${element.id}`);
@@ -84,66 +93,30 @@ export default {
 
     async deleteProduct(productId) {
       console.log("Deleted: " + productId)
+      useCartStore().removeFromCart(productId);
 
       // Usuń produkt z lokalnego koszyka
       this.cart = this.cart.filter(item => item.id !== productId);
-
-      // Zaktualizuj koszyk w localStorage
-      const updatedCart = this.cart.map(item => ({
-        id: item.id,
-        quantity: item.quantity
-      }));
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-
       alert('Product deleted from cart successfully!');
     },
+
     async finalizeOrder() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const products = cart.map(product => ({
-        productId: product.id,
-        quantity: product.quantity
-      }));
-
-      if (products.length === 0) {
-        alert('Your cart is empty!');
-        return;
-      }
-
       try {
-        const response = await axios.post('http://localhost:3000/orders', {
-          statusId: 1,
-          userId: this.getCookie("id"),
-          orderDate: new Date().toISOString(),
-          products: products,
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        });
-        if (response.status === 200 || response.status === 201) {
-          console.log(response);
-
-          this.cart = [];
-          localStorage.removeItem('cart');
+        let finalized = await useCartStore().finalizeOrder(this.getCookie("id"));
+        if (finalized) {
           alert('Order finalized and cart cleared!');
-
+        } else {
+          alert('Failed to finalize the order. Please try again.');
         }
       } catch (error) {
         console.error('Error finalizing order:', error);
         alert('Failed to finalize the order. Please try again.');
-
-        if (error.status === 401) {
-          // logout
-          document.cookie = 'authToken=; Max-Age=0';
-          document.cookie = 'type=; Max-Age=0';
-          document.cookie = 'id=; Max-Age=0';
-          this.$router.push('/authentication');
-        }
       }
     },
+
     updateQuantity(productId, newQuantity) {
       console.log(`Updating product ID ${productId} to quantity ${newQuantity}`);
+      useCartStore().updateQuantity(productId, newQuantity);
 
       // Znajdź produkt w koszyku i zaktualizuj ilość oraz cenę
       const product = this.cart.find(item => item.id === productId);
@@ -152,14 +125,7 @@ export default {
         product.price = product.product._price * newQuantity;
       }
 
-      // Zaktualizuj koszyk w localStorage
-      const updatedCart = this.cart.map(item => ({
-        id: item.id,
-        quantity: item.quantity
-      }));
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-
-      console.log('Cart updated in localStorage:', updatedCart);
+      console.log('Cart updated in localStorage:', this.cart);
     }
   }
 };
