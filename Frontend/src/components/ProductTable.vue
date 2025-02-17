@@ -185,12 +185,10 @@ export default {
           <td>{{product._weight}} kg</td>
           <td>{{product._category._name}}</td>
           <td>
-            <button class="btn btn-primary" @click="openPopup(product._id)">Add to cart</button>
+            <img src="../assets/add-to-cart-svg.svg"  alt="Add to cart" class="btn p-1 img-fluid" @click="openPopup(product._id)" style="max-width: 32px;" />
           </td>
           <td>
-            <button class="btn btn-info" @click="toggleDescription(product._id)">
-              {{ expandedProductId === product._id ? 'Hide Details' : 'Show Details' }}
-            </button>
+            <img src="../assets/info-svg.svg"  alt="Info" class="btn p-1 img-fluid" @click="toggleDescription(product._id)" style="max-width: 32px;" />
           </td>
 
           <!-- Rozwinięty opis -->
@@ -242,9 +240,36 @@ body {
 .grid-row {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.grid-row:hover {
+  background-color: #f5f5f5;
+  transition: background-color 0.2s ease;
+}
+
+th {
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  height: 100%;
+}
+
+td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  min-height: 100%;
 }
 
 .break-line {
   grid-column: 1 / -1;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  background-color: #ffffff;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 </style>

@@ -13,7 +13,7 @@
                 type="text"
                 class="form-control"
                 id="userName"
-                placeholder="Enter userName"
+                placeholder="Enter username"
                 required
             />
           </div>
