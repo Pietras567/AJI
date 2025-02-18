@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import {OrderStatus} from '../entities/OrderStatus';
 import "reflect-metadata";
 import {AppDataSource} from "../index";
-import {app} from "../app";
+import app from "../app";
 import {authenticateJWT} from "../authenticationJWT";
 
 //Pobierz dozwolone stany zamówień

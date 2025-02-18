@@ -6,7 +6,7 @@ import {OrderStatus} from '../entities/OrderStatus';
 import {User} from "../entities/User"
 import "reflect-metadata";
 import {AppDataSource} from "../index";
-import {app} from "../app";
+import app from "../app";
 import {authenticateJWT} from "../authenticationJWT";
 
 

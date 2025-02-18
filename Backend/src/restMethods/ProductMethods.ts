@@ -3,7 +3,7 @@ import {Category} from "../entities/Category";
 import {Product} from '../entities/Product';
 import "reflect-metadata";
 import {AppDataSource} from "../index";
-import {app} from "../app";
+import app from "../app";
 import {authenticateJWT} from "../authenticationJWT";
 
 

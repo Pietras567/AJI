@@ -8,7 +8,7 @@ import {User} from "./entities/User"
 import "reflect-metadata";
 import {Opinion} from "./entities/Opinion";
 import {Account} from "./entities/Account";
-import {app} from "./app"
+import app from "./app"
 import "./restMethods/CategoryMethods";
 import "./restMethods/InitialisationMethods";
 import "./restMethods/OpinionMethods";

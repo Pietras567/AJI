@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-export const app = express();
+const app = express();
 
 app.use(cors({
     origin: 'http://localhost:5173',
@@ -11,3 +11,5 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+export default app;

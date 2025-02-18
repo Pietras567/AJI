@@ -7,7 +7,7 @@ import "reflect-metadata";
 import {Account} from "../entities/Account";
 import jwt from "jsonwebtoken";
 import {AppDataSource} from "../index";
-import {app} from "../app";
+import app from "../app";
 import {authenticateJWT} from "../authenticationJWT";
 import * as dotenv from "dotenv";
 

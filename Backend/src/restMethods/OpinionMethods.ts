@@ -5,7 +5,7 @@ import {User} from "../entities/User"
 import "reflect-metadata";
 import {Opinion} from "../entities/Opinion";
 import {AppDataSource} from "../index";
-import {app} from "../app";
+import app from "../app";
 import {authenticateJWT} from "../authenticationJWT";
 
 // D4

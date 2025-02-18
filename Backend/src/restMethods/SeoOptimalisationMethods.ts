@@ -3,7 +3,7 @@ import {Product} from '../entities/Product';
 import "reflect-metadata";
 import axios from "axios";
 import {AppDataSource} from "../index";
-import {app} from "../app";
+import app from "../app";
 import {authenticateJWT} from "../authenticationJWT";
 
 //D1
