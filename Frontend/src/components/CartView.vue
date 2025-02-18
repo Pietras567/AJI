@@ -6,17 +6,16 @@ import { mapState, mapActions } from 'pinia'
 export default {
   data() {
     return {
-      cart: [],
       orderStatuses: [],
     };
   },
   created() {
-    this.finalizeCart();
+    this.initializeCart();
     this.fetchOrderStatuses();
   },
 
   computed: {
-    ...mapState(useCartStore, ['items', 'deliveryInfo']),
+    ...mapState(useCartStore, ['items', 'deliveryInfo', 'cartData', 'totalPrice']),
     isFormValid() {
       return (
           this.deliveryInfo.address &&
@@ -67,11 +66,9 @@ export default {
       return null;
     },
 
-    async finalizeCart() {
+    async initializeCart() {
       try {
-        await useCartStore().fetchProducts();
-        this.cart = useCartStore().cartProducts;
-        console.log(this.cart);
+        await this.fetchProducts();
       } catch (error) {
         console.error('Error loading cart: ', error);
       }
@@ -88,10 +85,7 @@ export default {
 
     async deleteProduct(productId) {
       console.log("Deleted: " + productId)
-      useCartStore().removeFromCart(productId);
-
-      // Usuń produkt z lokalnego koszyka
-      this.cart = this.cart.filter(item => item.id !== productId);
+      await this.removeFromCart(productId);
       alert('Product deleted from cart successfully!');
     },
 
@@ -114,14 +108,8 @@ export default {
       console.log(`Updating product ID ${productId} to quantity ${newQuantity}`);
       useCartStore().updateQuantity(productId, newQuantity);
 
-      // Znajdź produkt w koszyku i zaktualizuj ilość oraz cenę
-      const product = this.cart.find(item => item.id === productId);
-      if (product) {
-        product.quantity = newQuantity;
-        product.price = product.product._price * newQuantity;
-      }
-
-      console.log('Cart updated in localStorage:', this.cart);
+      console.log('Cart updated in component. Cart data is now:');
+      console.log(this.cartData);
     }
   }
 };
@@ -140,7 +128,7 @@ export default {
     </tr>
     </thead>
     <tbody>
-    <tr v-for="product in this.cart" :key="cart.id">
+    <tr v-for="product in cartData" :key="product.id">
       <td>{{product.product._name}}</td>
       <td>{{product.price}} PLN</td>
       <td>
@@ -152,7 +140,7 @@ export default {
       </td>
     </tr>
     <tr class="text-end">
-      Tolal price: {{useCartStore().totalPrice}} PLN
+      Tolal price: {{totalPrice}} PLN
     </tr>
     </tbody>
   </table>

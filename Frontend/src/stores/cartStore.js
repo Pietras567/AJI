@@ -92,7 +92,7 @@ export const useCartStore = defineStore('cart', {
                     });
                 }
                 this.calculateTotal();
-                console.log("Updated cart data")
+                console.log("Updated cart data in store:")
                 console.log(this.cartData)
             } catch (error) {
                 console.error('Error updating cart data:', error);
