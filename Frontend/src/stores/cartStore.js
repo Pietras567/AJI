@@ -8,39 +8,109 @@ export const useCartStore = defineStore('cart', {
             address: '',
             postalCode: '',
             city: '',
-        }
+        },
+        cartData: [],
+        total: 0,
     }),
 
     getters: {
         cartItems: (state) => state.items,
-        totalPrice: (state) => {
-            return state.items.reduce((total, item) => total + item.price, 0)
-        }
+        totalPrice: (state) => state.total,
+        cartIsEmpty: (state) => state.items.length === 0,
+        cartProducts: (state) => state.cartData
     },
 
     actions: {
-        addToCart(productId, quantity) {
+        async fetchProduct(productId) {
+            try {
+                return (await axios.get(`http://localhost:3000/products/${productId}`));
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                throw error;
+            }
+        },
+
+        async fetchProducts() {
+            try {
+                this.cartData = [];
+                this.total = 0;
+
+                for (const element of this.items) {
+                    console.log("id: "  + element.id + ", quantity: " + element.quantity)
+                    const response = await axios.get(`http://localhost:3000/products/${element.id}`);
+                    //const response = useCartStore().fetchProduct(element.id);
+                    this.cartData.push({id: element.id, quantity: element.quantity, product: response.data, price: response.data._price * element.quantity});
+                }
+                this.cartData.forEach((element) => this.total += element.price);
+                console.log(this.cartData);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        },
+
+        async addToCart(productId, quantity) {
             const existingItem = this.items.find(item => item.id === productId)
             if (existingItem) {
                 existingItem.quantity += quantity
+                await this.updateCartDataItem(productId, existingItem.quantity);
             } else {
                 this.items.push({ id: productId, quantity })
+                await this.updateCartDataItem(productId, quantity);
             }
         },
 
         removeFromCart(productId) {
-            this.items = this.items.filter(item => item.id !== productId)
+            this.items = this.items.filter(item => item.id !== productId);
+            this.cartData = this.cartData.filter(item => item.id !== productId);
+            this.calculateTotal();
         },
 
-        updateQuantity(productId, quantity) {
+        // Przeliczanie sumy
+        calculateTotal() {
+            this.total = this.cartData.reduce((sum, item) => sum + item.price, 0);
+        },
+
+        // Pomocnicza metoda do aktualizacji cartData dla pojedynczego produktu
+        async updateCartDataItem(productId, quantity) {
+            try {
+                const response = await axios.get(`http://localhost:3000/products/${productId}`);
+                const existingIndex = this.cartData.findIndex(item => item.id === productId);
+
+                if (existingIndex !== -1) {
+                    this.cartData[existingIndex] = {
+                        id: productId,
+                        quantity: quantity,
+                        product: response.data,
+                        price: response.data._price * quantity
+                    };
+                } else {
+                    this.cartData.push({
+                        id: productId,
+                        quantity: quantity,
+                        product: response.data,
+                        price: response.data._price * quantity
+                    });
+                }
+                this.calculateTotal();
+                console.log("Updated cart data")
+                console.log(this.cartData)
+            } catch (error) {
+                console.error('Error updating cart data:', error);
+            }
+        },
+
+        async updateQuantity(productId, quantity) {
             const item = this.items.find(item => item.id === productId)
             if (item) {
                 item.quantity = quantity
+                await this.updateCartDataItem(productId, quantity);
             }
         },
 
         clearCart() {
-            this.items = []
+            this.items = [];
+            this.cartData = [];
+            this.total = 0;
         },
 
         async finalizeOrder(userId) {

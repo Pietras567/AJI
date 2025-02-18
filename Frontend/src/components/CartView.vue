@@ -27,11 +27,13 @@ export default {
   },
 
   methods: {
+    useCartStore,
     ...mapActions(useCartStore, [
       'removeFromCart',
       'updateQuantity',
       'finalizeOrder',
-      'clearCart'
+      'clearCart',
+      'fetchProducts',
     ]),
 
     async fetchOrderStatuses() {
@@ -67,15 +69,8 @@ export default {
 
     async finalizeCart() {
       try {
-        const cart = useCartStore().cartItems;
-        console.log(cart);
-
-        for (const element of cart) {
-          console.log("id: "  + element.id + ", quantity: " + element.quantity)
-          const response = await axios.get(`http://localhost:3000/products/${element.id}`);
-          this.cart.push({id: element.id, quantity: element.quantity, product: response.data, price: response.data._price * element.quantity});
-        }
-        this.cart.forEach((element) => console.log(element))
+        await useCartStore().fetchProducts();
+        this.cart = useCartStore().cartProducts;
         console.log(this.cart);
       } catch (error) {
         console.error('Error loading cart: ', error);
@@ -105,6 +100,7 @@ export default {
         let finalized = await useCartStore().finalizeOrder(this.getCookie("id"));
         if (finalized) {
           alert('Order finalized and cart cleared!');
+          this.$router.push('/cart');
         } else {
           alert('Failed to finalize the order. Please try again.');
         }
@@ -154,6 +150,9 @@ export default {
       <td>
         <img src="@/assets/delete.svg" alt="Delete" width="32px" @click="deleteProduct(product.id)" class="align-bottom">
       </td>
+    </tr>
+    <tr class="text-end">
+      Tolal price: {{useCartStore().totalPrice}} PLN
     </tr>
     </tbody>
   </table>
